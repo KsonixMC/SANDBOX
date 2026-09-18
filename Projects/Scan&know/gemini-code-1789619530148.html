@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="uz" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan&Know — Haqiqiy Mahsulot Skaneri</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- HTML5 QrCode Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            green: '#10B981',
+                            greenDark: '#059669',
+                            navy: '#0F172A',
+                            navyLight: '#1E293B',
+                            purple: '#8B5CF6',
+                            orange: '#F97316',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #10B981 0%, #8B5CF6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Camera overlay styles */
+        #reader { width: 100%; border-radius: 1rem; overflow: hidden; border: none !important; }
+        #reader video { object-fit: cover; border-radius: 1rem; }
+        #reader__dashboard_section_csr span { color: #fff !important; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- HEADER -->
+    <header class="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-slate-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <a href="#" class="flex items-center gap-2 text-xl font-extrabold text-brand-navy tracking-tight" onclick="resetApp()">
+                <span class="w-8 h-8 rounded-lg bg-brand-green text-white flex items-center justify-center shadow-md">
+                    <i class="fa-solid fa-qrcode"></i>
+                </span>
+                Scan<span class="text-brand-green">&</span>Know
+            </a>
+            <button onclick="resetApp()" class="text-sm font-semibold text-brand-navy hover:text-brand-green transition-colors">
+                <i class="fa-solid fa-rotate-right"></i> Yangilash
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-grow max-w-3xl mx-auto w-full px-4 sm:px-6 py-8">
+        
+        <!-- INTRO & SCANNER SECTION -->
+        <div id="scan-section" class="text-center transition-all duration-500">
+            <h1 class="text-3xl font-extrabold text-brand-navy mb-3">Mahsulotni Skanerlang</h1>
+            <p class="text-slate-500 text-sm mb-8">Kamerani mahsulotning shtrix-kodiga qarating. Ma'lumotlar real vaqtda global bazadan olinadi.</p>
+            
+            <div class="bg-white p-4 sm:p-6 rounded-3xl shadow-xl border border-slate-100">
+                <!-- Camera Container -->
+                <div id="reader-container" class="relative w-full aspect-square sm:aspect-video bg-slate-900 rounded-2xl overflow-hidden flex flex-col items-center justify-center">
+                    <div id="reader"></div>
+                    <div id="camera-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 z-10 bg-slate-900">
+                        <i class="fa-solid fa-camera text-5xl mb-4"></i>
+                        <p class="text-sm">Kamera faol emas</p>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="btn-start-camera" class="w-full sm:w-auto px-8 py-3.5 bg-brand-green hover:bg-brand-greenDark text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-camera"></i> Kamerani Ochish
+                    </button>
+                    <button id="btn-stop-camera" class="hidden w-full sm:w-auto px-8 py-3.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-stop"></i> To'xtatish
+                    </button>
+                </div>
+
+                <!-- Manual Barcode Fallback -->
+                <div class="mt-6 pt-6 border-t border-slate-100">
+                    <p class="text-xs text-slate-400 mb-2 uppercase tracking-wider font-bold">Yoki shtrix-kodni qo'lda kiriting:</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="manual-barcode" placeholder="Masalan: 3017620422003 (Nutella)" class="flex-grow px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-green text-sm font-mono">
+                        <button onclick="searchManualBarcode()" class="px-6 py-3 bg-brand-navy hover:bg-slate-800 text-white font-bold rounded-xl transition-all">
+                            Qidirish
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOADING SECTION -->
+        <div id="loading-section" class="hidden flex flex-col items-center justify-center py-20 text-center">
+            <div class="w-16 h-16 border-4 border-slate-200 border-t-brand-green rounded-full animate-spin mb-4"></div>
+            <h2 class="text-xl font-bold text-brand-navy" id="loading-text">Skanerlanmoqda...</h2>
+            <p class="text-slate-500 text-sm mt-2">Open Food Facts bazasidan ma'lumotlar olinmoqda</p>
+        </div>
+
+        <!-- RESULT SECTION -->
+        <div id="result-section" class="hidden animate-fade-in-up transition-all duration-500">
+            <!-- Product Header -->
+            <div class="bg-white p-6 rounded-3xl shadow-xl border border-slate-100 mb-6 flex flex-col sm:flex-row gap-6 items-center sm:items-start">
+                <div class="w-32 h-32 bg-slate-100 rounded-2xl flex-shrink-0 flex items-center justify-center overflow-hidden border border-slate-200 p-2">
+                    <img id="res-image" src="" alt="Mahsulot" class="max-w-full max-h-full object-contain hidden">
+                    <i id="res-image-icon" class="fa-solid fa-image text-4xl text-slate-300"></i>
+                </div>
+                <div class="text-center sm:text-left flex-grow">
+                    <span id="res-brand" class="text-sm font-bold text-brand-purple uppercase tracking-wider">Brend Nomi</span>
+                    <h2 id="res-name" class="text-2xl font-extrabold text-brand-navy mt-1 leading-tight">Mahsulot Nomi</h2>
+                    <p class="text-xs text-slate-400 mt-2 font-mono">Shtrix-kod: <span id="res-barcode"></span></p>
+                    
+                    <div class="mt-4 flex flex-wrap gap-2 justify-center sm:justify-start">
+                        <span id="res-nutriscore" class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 flex items-center gap-1">
+                            Nutri-Score: <span class="uppercase">?</span>
+                        </span>
+                        <span id="res-nova" class="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg border border-slate-200 flex items-center gap-1">
+                            NOVA: <span>?</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Summary (Mock based on real data) -->
+            <div class="bg-gradient-to-r from-brand-navy to-slate-800 p-6 rounded-3xl shadow-xl border border-slate-700 mb-6 text-white">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-robot text-brand-green text-xl"></i>
+                    <h3 class="font-bold text-lg">AI Tahlil Xulosasi</h3>
+                </div>
+                <p id="res-ai-summary" class="text-slate-300 text-sm leading-relaxed">
+                    Xulosa tayyorlanmoqda...
+                </p>
+            </div>
+
+            <!-- Details Grid -->
+            <div class="grid sm:grid-cols-2 gap-4 mb-6">
+                <!-- Ingredients -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-list text-brand-green"></i> Tarkib
+                    </h4>
+                    <p id="res-ingredients" class="text-sm text-slate-700 leading-relaxed max-h-32 overflow-y-auto pr-2 custom-scrollbar">Ma'lumot topilmadi</p>
+                </div>
+
+                <!-- Additives -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-flask text-brand-purple"></i> E-Qo'shimchalar
+                    </h4>
+                    <div id="res-additives" class="flex flex-wrap gap-2 text-sm">Yo'q yoki topilmadi</div>
+                </div>
+
+                <!-- Allergens -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 sm:col-span-2">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation text-brand-orange"></i> Allergenlar
+                    </h4>
+                    <p id="res-allergens" class="text-sm font-semibold text-brand-orange bg-orange-50 p-3 rounded-xl border border-orange-100">Ma'lumot topilmadi</p>
+                </div>
+            </div>
+
+            <!-- Nutritional Info (Traffic Lights) -->
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                <h4 class="font-bold text-brand-navy mb-4">Ozuqaviy Ko'rsatkichlar</h4>
+                <div class="grid grid-cols-3 gap-4 text-center">
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <span class="block text-xs text-slate-500 mb-1">Shakar</span>
+                        <div id="level-sugar" class="w-full h-2 rounded-full bg-slate-200 mb-2"></div>
+                        <span id="text-sugar" class="text-sm font-bold text-slate-700">?</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <span class="block text-xs text-slate-500 mb-1">Tuz</span>
+                        <div id="level-salt" class="w-full h-2 rounded-full bg-slate-200 mb-2"></div>
+                        <span id="text-salt" class="text-sm font-bold text-slate-700">?</span>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <span class="block text-xs text-slate-500 mb-1">Yog'</span>
+                        <div id="level-fat" class="w-full h-2 rounded-full bg-slate-200 mb-2"></div>
+                        <span id="text-fat" class="text-sm font-bold text-slate-700">?</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-8 text-center">
+                <button onclick="resetApp()" class="px-8 py-3 bg-brand-green hover:bg-brand-greenDark text-white font-bold rounded-xl shadow-lg transition-all">
+                    Yangi mahsulot skanerlash
+                </button>
+            </div>
+        </div>
+
+        <!-- NOT FOUND / FALLBACK SECTION -->
+        <div id="not-found-section" class="hidden text-center py-10">
+            <div class="w-20 h-20 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-brand-navy">Mahsulot bazada topilmadi</h2>
+            <p class="text-slate-500 text-sm mt-2 mb-8 max-w-md mx-auto">Skaner qilingan shtrix-kod global bazamizda (Open Food Facts) mavjud emas.</p>
+            
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm max-w-md mx-auto text-left relative overflow-hidden">
+                <span class="absolute top-0 left-0 w-1 bg-brand-purple h-full"></span>
+                <h3 class="font-bold text-brand-navy mb-2"><i class="fa-solid fa-cloud-arrow-up text-brand-purple mr-2"></i> Rasm orqali OCR Analiz</h3>
+                <p class="text-xs text-slate-500 mb-4">Yorliqdagi yozuvlarni rasmga olib, sun'iy intellekt orqali o'qitish funksiyasi.</p>
+                <input type="file" accept="image/*" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-purple/10 file:text-brand-purple hover:file:bg-brand-purple/20 transition-all cursor-not-allowed" disabled title="Faqat to'liq backend integratsiyasida ishlaydi">
+                
+                <div class="mt-4 p-3 bg-amber-50 rounded-xl border border-amber-100 text-xs text-amber-800 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <p><b>Cheklov:</b> Xavfsizlik talablariga ko'ra (API kalitlarini ochiq kodda yashirmaslik uchun), rasm yuklash va OpenAI GPT / Vision orqali tahlil qilish uchun alohida <b>Backend server</b> (Node.js/Python) talab qilinadi. Hozirgi versiya faqat Ochiq API bilan ishlaydi.</p>
+                </div>
+            </div>
+            
+            <button onclick="resetApp()" class="mt-8 px-6 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition-all">
+                Orqaga qaytish
+            </button>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-6 text-center mt-auto">
+        <p class="text-sm font-semibold text-brand-navy">Scan&Know - Sog'lom Tanlov</p>
+        <p class="text-xs text-slate-400 mt-1">Ma'lumotlar <b>Open Food Facts</b> API orqali taqdim etiladi.</p>
+        <div class="mt-4 text-xs font-bold text-slate-300">
+            Created by Abubakr Akhmadjanov
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // DOM Elements
+        const secScan = document.getElementById('scan-section');
+        const secLoading = document.getElementById('loading-section');
+        const secResult = document.getElementById('result-section');
+        const secNotFound = document.getElementById('not-found-section');
+        
+        const btnStart = document.getElementById('btn-start-camera');
+        const btnStop = document.getElementById('btn-stop-camera');
+        const cameraPlaceholder = document.getElementById('camera-placeholder');
+        
+        let html5QrCode = null;
+
+        // Initialize Camera
+        btnStart.addEventListener('click', () => {
+            cameraPlaceholder.classList.add('hidden');
+            btnStart.classList.add('hidden');
+            btnStop.classList.remove('hidden');
+            
+            html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+            
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, onScanFailure)
+                .catch((err) => {
+                    alert("Kameraga ulanishda xatolik. Iltimos ruxsat bering yoki https da oching.\n" + err);
+                    resetApp();
+                });
+        });
+
+        // Stop Camera
+        btnStop.addEventListener('click', stopCamera);
+
+        function stopCamera() {
+            if (html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    html5QrCode.clear();
+                    btnStart.classList.remove('hidden');
+                    btnStop.classList.add('hidden');
+                    cameraPlaceholder.classList.remove('hidden');
+                }).catch(err => console.log(err));
+            }
+        }
+
+        // On Scan Success
+        function onScanSuccess(decodedText, decodedResult) {
+            stopCamera();
+            processBarcode(decodedText);
+        }
+
+        function onScanFailure(error) {
+            // constantly triggered when scanning, safe to ignore
+        }
+
+        // Manual Barcode Entry
+        function searchManualBarcode() {
+            const val = document.getElementById('manual-barcode').value.trim();
+            if(val.length > 5) {
+                processBarcode(val);
+            } else {
+                alert("Iltimos to'g'ri shtrix-kod kiriting.");
+            }
+        }
+
+        // Process Barcode and Fetch API
+        async function processBarcode(barcode) {
+            showLoading("Shtrix-kod: " + barcode + " qidirilmoqda...");
+            
+            try {
+                // Open Food Facts API (Public, No Auth needed)
+                const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                const data = await response.json();
+                
+                if(data.status === 1 && data.product) {
+                    renderProductData(data.product, barcode);
+                } else {
+                    showNotFound();
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Internetga ulanishda xatolik yuz berdi.");
+                resetApp();
+            }
+        }
+
+        // Render Data to UI
+        function renderProductData(product, barcode) {
+            secLoading.classList.add('hidden');
+            secResult.classList.remove('hidden');
+
+            // Header Info
+            document.getElementById('res-barcode').innerText = barcode;
+            document.getElementById('res-name').innerText = product.product_name || "Noma'lum Mahsulot";
+            document.getElementById('res-brand').innerText = product.brands || "Noma'lum Brend";
+            
+            // Image
+            const imgEl = document.getElementById('res-image');
+            const iconEl = document.getElementById('res-image-icon');
+            if(product.image_url) {
+                imgEl.src = product.image_url;
+                imgEl.classList.remove('hidden');
+                iconEl.classList.add('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+                iconEl.classList.remove('hidden');
+            }
+
+            // Ratings
+            const nScore = (product.nutriscore_grade || "?").toUpperCase();
+            document.getElementById('res-nutriscore').innerHTML = `Nutri-Score: <span class="uppercase font-extrabold ${getScoreColor(nScore)}">${nScore}</span>`;
+            document.getElementById('res-nova').innerHTML = `NOVA: <span class="font-extrabold text-slate-800">${product.nova_group || "?"}</span>`;
+
+            // Ingredients
+            document.getElementById('res-ingredients').innerText = product.ingredients_text || "Tarkib ma'lumotlari kiritilmagan.";
+
+            // Additives
+            const addDiv = document.getElementById('res-additives');
+            addDiv.innerHTML = '';
+            if(product.additives_tags && product.additives_tags.length > 0) {
+                product.additives_tags.forEach(tag => {
+                    const eName = tag.replace('en:', '').toUpperCase();
+                    const span = document.createElement('span');
+                    span.className = "px-2 py-1 bg-purple-50 text-brand-purple font-bold text-xs rounded border border-purple-100";
+                    span.innerText = eName;
+                    addDiv.appendChild(span);
+                });
+            } else {
+                addDiv.innerText = "Qo'shimchalar aniqlanmadi.";
+            }
+
+            // Allergens
+            const allDiv = document.getElementById('res-allergens');
+            if(product.allergens) {
+                // translate standard en:milk to uzbek ideally, but raw output for now
+                const rawAllergens = product.allergens.replace(/en:/g, '').replace(/fr:/g, '');
+                allDiv.innerText = rawAllergens.length > 0 ? rawAllergens : "Xavfli allergenlar topilmadi";
+                allDiv.className = rawAllergens.length > 0 
+                    ? "text-sm font-semibold text-brand-orange bg-orange-50 p-3 rounded-xl border border-orange-100 uppercase" 
+                    : "text-sm font-semibold text-emerald-600 bg-emerald-50 p-3 rounded-xl border border-emerald-100";
+            } else {
+                allDiv.innerText = "Allergen ma'lumoti kiritilmagan.";
+                allDiv.className = "text-sm font-semibold text-slate-500 bg-slate-50 p-3 rounded-xl border border-slate-100";
+            }
+
+            // Macros / Traffic Lights
+            setNutrientLevel('sugar', product.nutrient_levels?.sugars);
+            setNutrientLevel('salt', product.nutrient_levels?.salt);
+            setNutrientLevel('fat', product.nutrient_levels?.fat);
+
+            // Generate Mock AI Summary based on product data (Local rule-based fallback)
+            generateAISummary(product);
+        }
+
+        // Helper: Format Nutrient levels
+        function setNutrientLevel(id, level) {
+            const bar = document.getElementById(`level-${id}`);
+            const text = document.getElementById(`text-${id}`);
+            
+            // reset classes
+            bar.className = "w-full h-2 rounded-full mb-2 bg-slate-200";
+            
+            if(level === 'low') {
+                bar.classList.add('bg-green-500');
+                text.innerText = "Kam";
+                text.className = "text-sm font-bold text-green-600";
+            } else if (level === 'moderate') {
+                bar.classList.add('bg-amber-500');
+                text.innerText = "O'rtacha";
+                text.className = "text-sm font-bold text-amber-600";
+            } else if (level === 'high') {
+                bar.classList.add('bg-red-500');
+                text.innerText = "Yuqori";
+                text.className = "text-sm font-bold text-red-600";
+            } else {
+                text.innerText = "?";
+                text.className = "text-sm font-bold text-slate-400";
+            }
+        }
+
+        // Helper: Colors for NutriScore
+        function getScoreColor(grade) {
+            switch(grade) {
+                case 'A': return 'text-green-600';
+                case 'B': return 'text-green-500';
+                case 'C': return 'text-amber-500';
+                case 'D': return 'text-orange-500';
+                case 'E': return 'text-red-600';
+                default: return 'text-slate-600';
+            }
+        }
+
+        // Fake AI logic that uses actual data to write a human-readable text
+        function generateAISummary(product) {
+            let txt = `Ushbu mahsulot (${product.product_name || 'tovar'}) `;
+            
+            // Check processing (NOVA)
+            if(product.nova_group === 4) {
+                txt += "yuqori darajada ishlangan (ultra-processed) hisoblanadi. ";
+            } else if (product.nova_group === 1) {
+                txt += "tabiiy yoki minimal ishlangan toza mahsulot. ";
+            } else if (product.nova_group) {
+                txt += "o'rtacha ishlov berilgan. ";
+            }
+
+            // Check Additives
+            let adds = product.additives_tags ? product.additives_tags.length : 0;
+            if(adds > 4) {
+                txt += `Tarkibida ${adds} ta sun'iy E-qo'shimcha mavjud, ularning salomatlikka ta'sirini o'rganib chiqish tavsiya etiladi. `;
+            } else if(adds > 0) {
+                txt += `Tarkibida ${adds} xil qo'shimcha bor. `;
+            } else {
+                txt += `Tarkibida sun'iy E-qo'shimchalar aniqlanmadi (toza tarkib). `;
+            }
+
+            // Check Sugar/Salt based on levels
+            if(product.nutrient_levels?.sugars === 'high' || product.nutrient_levels?.salt === 'high') {
+                txt += "Diqqat qiling: tarkibida shakar yoki tuz miqdori juda yuqori! Doimiy iste'mol qilish sog'liq uchun xavfli bo'lishi mumkin. ";
+            }
+
+            // NutriScore conclusion
+            if(['A','B'].includes((product.nutriscore_grade||'').toUpperCase())) {
+                txt += "\n\n✅ Xulosa: Mahsulot sog'lom ozuqaviy qiymatga ega, kundalik iste'mol uchun xavfsiz (Nutri-Score reytingi yaxshi).";
+            } else if(['D','E'].includes((product.nutriscore_grade||'').toUpperCase())) {
+                txt += "\n\n⚠️ Xulosa: Ozuqaviy reytingi past (Nutri-Score D/E). Faqat vaqti-vaqti bilan va oz miqdorda iste'mol qilish maslahat beriladi.";
+            } else {
+                txt += "\n\nℹ️ Xulosa: Umumiy qilib aytganda, o'rtacha ko'rsatkichlarga ega. Me'yorni bilgan holda iste'mol qiling.";
+            }
+
+            document.getElementById('res-ai-summary').innerText = txt;
+        }
+
+        // UI State Handlers
+        function showLoading(text) {
+            secScan.classList.add('hidden');
+            secNotFound.classList.add('hidden');
+            secResult.classList.add('hidden');
+            
+            secLoading.classList.remove('hidden');
+            document.getElementById('loading-text').innerText = text;
+        }
+
+        function showNotFound() {
+            secLoading.classList.add('hidden');
+            secNotFound.classList.remove('hidden');
+        }
+
+        function resetApp() {
+            stopCamera();
+            secLoading.classList.add('hidden');
+            secResult.classList.add('hidden');
+            secNotFound.classList.add('hidden');
+            secScan.classList.remove('hidden');
+            document.getElementById('manual-barcode').value = '';
+        }
+    </script>
+</body>
+</html>

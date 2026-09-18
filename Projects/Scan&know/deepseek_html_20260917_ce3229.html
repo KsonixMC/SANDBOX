@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scan&Know — Har bir tovar endi to‘liq shaffof</title>
+<meta name="description" content="Scan&Know — mahsulot shtrix-kodini skanerlang va tarkibi, E-qo‘shimchalari, allergenlari, foydasi va xavflari haqida bir zumda bilib oling.">
+<meta name="theme-color" content="#0b2545">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Scan&Know — Har bir tovar endi to‘liq shaffof">
+<meta property="og:description" content="Shtrix-kodni skanerlang. AI tahlil qilsin. Ongli tanlov qiling.">
+<meta property="og:type" content="website">
+
+<!-- Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://world.openfoodfacts.org">
+<link rel="preconnect" href="https://images.openfoodfacts.org">
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<!-- Barcode Scanner Library -->
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<style>
+/* ═══════════════════════════════════════════════════════════
+   SCAN&KNOW — Design System
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --green:#12b76a;
+  --green-600:#059669;
+  --green-50:#eafaf1;
+  --green-100:#d1f5e0;
+  --navy:#0b2545;
+  --navy-700:#123a63;
+  --navy-50:#eef4fb;
+  --purple:#7c5cff;
+  --purple-50:#f2efff;
+  --orange:#ff8a3d;
+  --orange-50:#fff3e9;
+  --red:#e53e3e;
+  --red-50:#fdecec;
+  --ink:#0f172a;
+  --muted:#5b6b82;
+  --line:#e6ecf3;
+  --soft:#f6f9fc;
+  --radius:22px;
+  --radius-sm:14px;
+  --shadow-sm:0 2px 10px rgba(11,37,69,.05);
+  --shadow:0 14px 40px rgba(11,37,69,.09);
+  --shadow-lg:0 30px 70px rgba(11,37,69,.14);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --safe-bottom:env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
+  color:var(--ink);background:#fff;line-height:1.65;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  padding-bottom:var(--safe-bottom);
+}
+img{max-width:100%;display:block}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+ul{list-style:none}
+.container{width:100%;max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* ── Typography ── */
+h1,h2,h3,h4{line-height:1.18;letter-spacing:-.02em;font-weight:800;color:var(--navy)}
+h1{font-size:clamp(2rem,5.5vw,3.6rem)}
+h2{font-size:clamp(1.6rem,4vw,2.5rem)}
+h3{font-size:1.12rem;font-weight:700}
+p{color:var(--muted)}
+.grad{background:linear-gradient(100deg,var(--green),var(--purple) 70%);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ── Buttons ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 24px;border-radius:100px;font-weight:700;font-size:.94rem;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),background .25s,color .25s,border-color .25s;
+  white-space:nowrap;min-height:48px;
+}
+.btn-primary{background:var(--green);color:#fff;box-shadow:0 10px 26px rgba(18,183,106,.32)}
+.btn-primary:hover{background:var(--green-600);transform:translateY(-2px);box-shadow:0 16px 34px rgba(18,183,106,.4)}
+.btn-dark{background:var(--navy);color:#fff;box-shadow:0 10px 26px rgba(11,37,69,.25)}
+.btn-dark:hover{background:var(--navy-700);transform:translateY(-2px)}
+.btn-ghost{background:#fff;color:var(--navy);border:1.5px solid var(--line)}
+.btn-ghost:hover{border-color:var(--green);color:var(--green-600);transform:translateY(-2px)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#c53030;transform:translateY(-2px)}
+.btn-lg{padding:16px 30px;font-size:1rem;min-height:54px}
+.btn-sm{padding:9px 18px;font-size:.84rem;min-height:40px}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;pointer-events:none}
+.btn-icon{width:48px;height:48px;padding:0;border-radius:50%}
+
+/* ── Nav ── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(255,255,255,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid transparent;transition:.35s var(--ease);
+}
+.nav.scrolled{border-bottom-color:var(--line);box-shadow:0 6px 24px rgba(11,37,69,.06)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:70px;gap:20px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.12rem;color:var(--navy);letter-spacing:-.03em}
+.logo-mark{
+  width:36px;height:36px;border-radius:11px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--green),var(--navy));color:#fff;
+  box-shadow:0 6px 16px rgba(18,183,106,.3);flex-shrink:0;
+}
+.logo-mark svg{width:19px;height:19px}
+.logo span b{color:var(--green)}
+.nav-links{display:flex;align-items:center;gap:2px}
+.nav-links a{padding:9px 14px;border-radius:100px;font-size:.88rem;font-weight:600;color:var(--muted);transition:.25s}
+.nav-links a:hover{color:var(--navy);background:var(--soft)}
+.nav-right{display:flex;align-items:center;gap:12px}
+.burger{display:none;width:44px;height:44px;border-radius:12px;border:1.5px solid var(--line);flex-direction:column;gap:5px;align-items:center;justify-content:center;background:#fff}
+.burger span{display:block;width:19px;height:2px;background:var(--navy);border-radius:2px;transition:.3s var(--ease)}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0;transform:scaleX(.4)}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ── Sections ── */
+section{padding:96px 0;position:relative}
+.sec-head{max-width:680px;margin:0 auto 56px;text-align:center}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 15px;border-radius:100px;background:var(--green-50);color:var(--green-600);
+  font-size:.76rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px;
+}
+.eyebrow.purple{background:var(--purple-50);color:var(--purple)}
+.eyebrow.orange{background:var(--orange-50);color:#d9702a}
+.eyebrow.red{background:var(--red-50);color:var(--red)}
+.eyebrow.navy{background:var(--navy-50);color:var(--navy-700)}
+.sec-head p{font-size:1.04rem;margin-top:14px}
+
+/* ── Hero ── */
+.hero{padding:150px 0 90px;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-180px;right:-160px;width:620px;height:620px;border-radius:50%;background:radial-gradient(circle,rgba(18,183,106,.16),transparent 65%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-220px;left:-180px;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,255,.13),transparent 65%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center;position:relative;z-index:1}
+.hero h1{margin-bottom:22px}
+.hero .lead{font-size:1.08rem;max-width:560px;margin-bottom:32px}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:46px}
+.hero-stats{display:flex;gap:38px;flex-wrap:wrap}
+.stat b{display:block;font-size:1.6rem;font-weight:800;color:var(--navy);letter-spacing:-.03em;line-height:1.2}
+.stat span{font-size:.84rem;color:var(--muted);font-weight:500}
+
+/* Hero visual */
+.hero-visual{position:relative;display:flex;justify-content:center}
+.phone{
+  width:100%;max-width:340px;background:#fff;border-radius:34px;padding:22px;
+  box-shadow:var(--shadow-lg);border:1px solid var(--line);position:relative;z-index:2;
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.phone-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.phone-title{font-size:.8rem;font-weight:800;color:var(--navy)}
+.dot-live{display:inline-flex;align-items:center;gap:6px;font-size:.7rem;font-weight:700;color:var(--green-600)}
+.dot-live i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.35)}}
+.scan-box{position:relative;border-radius:20px;background:var(--soft);padding:22px 18px;border:1.5px dashed #d4e2ef;overflow:hidden}
+.barcode{height:96px;border-radius:10px;background:#fff;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.barcode::before{
+  content:'';position:absolute;inset:14px 16px;
+  background:repeating-linear-gradient(90deg,var(--navy) 0 2px,transparent 2px 5px,var(--navy) 5px 8px,transparent 8px 10px,var(--navy) 10px 11px,transparent 11px 15px,var(--navy) 15px 18px,transparent 18px 19px,var(--navy) 19px 20px,transparent 20px 25px);
+  opacity:.9;
+}
+.scanline{position:absolute;left:8px;right:8px;height:3px;border-radius:3px;background:linear-gradient(90deg,transparent,var(--green),transparent);box-shadow:0 0 18px 5px rgba(18,183,106,.45);animation:scanmove 2.6s ease-in-out infinite}
+@keyframes scanmove{0%{top:14%}50%{top:82%}100%{top:14%}}
+.corner{position:absolute;width:22px;height:22px;border:3px solid var(--green);border-radius:5px}
+.corner.tl{top:8px;left:8px;border-right:0;border-bottom:0}
+.corner.tr{top:8px;right:8px;border-left:0;border-bottom:0}
+.corner.bl{bottom:8px;left:8px;border-right:0;border-top:0}
+.corner.br{bottom:8px;right:8px;border-left:0;border-top:0}
+.mini-result{margin-top:16px;display:flex;align-items:center;gap:12px;padding:12px;background:#fff;border-radius:16px;box-shadow:var(--shadow-sm);border:1px solid var(--line)}
+.mini-score{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--green-50);color:var(--green-600);font-weight:800;font-size:.92rem;flex-shrink:0}
+.mini-result b{display:block;font-size:.84rem;color:var(--navy);font-weight:700}
+.mini-result small{font-size:.72rem;color:var(--muted)}
+.float-chip{position:absolute;background:#fff;border-radius:15px;padding:11px 15px;box-shadow:var(--shadow);border:1px solid var(--line);display:flex;align-items:center;gap:9px;font-size:.78rem;font-weight:700;color:var(--navy);z-index:3;animation:float 5s ease-in-out infinite}
+.float-chip i{width:26px;height:26px;border-radius:9px;display:grid;place-items:center;font-size:.8rem;font-style:normal}
+.chip-1{top:8%;left:-6%;animation-delay:.5s}
+.chip-1 i{background:var(--orange-50);color:#d9702a}
+.chip-2{bottom:14%;right:-8%;animation-delay:1.4s}
+.chip-2 i{background:var(--purple-50);color:var(--purple)}
+.chip-3{bottom:-3%;left:2%;animation-delay:2.2s}
+.chip-3 i{background:var(--green-50);color:var(--green-600)}
+
+/* ── Reveal ── */
+[data-reveal]{opacity:0;transform:translateY(26px);transition:opacity .75s var(--ease),transform .75s var(--ease)}
+[data-reveal].in{opacity:1;transform:none}
+
+/* ── Problem ── */
+.problem{background:var(--soft)}
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.p-card{background:#fff;border-radius:var(--radius);padding:32px 28px;border:1px solid var(--line);transition:.4s var(--ease);position:relative;overflow:hidden}
+.p-card::after{content:'';position:absolute;left:0;top:0;height:100%;width:4px;background:linear-gradient(var(--green),var(--purple));transform:scaleY(0);transform-origin:top;transition:.45s var(--ease)}
+.p-card:hover{transform:translateY(-6px);box-shadow:var(--shadow);border-color:transparent}
+.p-card:hover::after{transform:scaleY(1)}
+.p-icon{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;margin-bottom:18px;font-size:1.35rem}
+.p-icon.red{background:var(--red-50)}
+.p-icon.orange{background:var(--orange-50)}
+.p-icon.purple{background:var(--purple-50)}
+.p-card h3{margin-bottom:10px}
+.p-card p{font-size:.94rem}
+.problem-quote{margin-top:44px;background:linear-gradient(120deg,var(--navy),var(--navy-700));border-radius:var(--radius);padding:38px 40px;display:flex;align-items:center;gap:26px;flex-wrap:wrap;color:#fff;position:relative;overflow:hidden}
+.problem-quote::before{content:'';position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(18,183,106,.35),transparent 70%)}
+.problem-quote p{color:rgba(255,255,255,.88);font-size:1.06rem;font-weight:600;flex:1;min-width:260px;position:relative;z-index:1}
+.problem-quote .pq-badge{background:var(--green);color:#fff;font-weight:800;font-size:.85rem;padding:10px 18px;border-radius:100px;position:relative;z-index:1}
+
+/* ── Scanner Section ── */
+.scanner-sec{background:linear-gradient(180deg,#fff 0%,var(--soft) 100%)}
+.scanner-container{max-width:680px;margin:0 auto}
+
+/* Scan states */
+.scan-state{padding:40px 28px;text-align:center;transition:.4s var(--ease)}
+.scan-state h3{margin-bottom:10px;font-size:1.2rem}
+.scan-state p{font-size:.92rem;margin-bottom:26px;max-width:420px;margin-left:auto;margin-right:auto}
+
+/* Camera view */
+#qr-reader{width:100%;border-radius:20px;overflow:hidden;display:none}
+#qr-reader video{border-radius:20px;object-fit:cover}
+#qr-reader__scan_region{min-height:240px}
+#qr-reader__dashboard_section_csr button{
+  background:var(--navy)!important;color:#fff!important;border:none!important;
+  padding:10px 20px!important;border-radius:100px!important;font-weight:700!important;font-size:.88rem!important;
+}
+#qr-reader__dashboard_section_csr select{
+  padding:8px 12px!important;border-radius:12px!important;border:1.5px solid var(--line)!important;font-size:.88rem!important;
+}
+#qr-reader img{display:none}
+
+/* Manual / fallback */
+.manual-input{display:flex;gap:10px;max-width:420px;margin:0 auto}
+.manual-input input{
+  flex:1;padding:13px 18px;border-radius:100px;border:1.5px solid var(--line);
+  font-size:.94rem;font-family:inherit;outline:none;transition:.3s;
+}
+.manual-input input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(18,183,106,.12)}
+.divider{display:flex;align-items:center;gap:16px;margin:30px 0;color:var(--muted);font-size:.82rem;font-weight:600}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* Loading */
+.loading-state{padding:50px 28px;text-align:center;display:none}
+.loader{width:56px;height:56px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--green);animation:spin .9s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-state b{display:block;font-size:1.05rem;color:var(--navy);margin-bottom:6px}
+.loading-state small{color:var(--muted);font-size:.86rem}
+.loading-dots{display:inline-flex;gap:4px;margin-top:12px}
+.loading-dots i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:dotPulse 1.2s infinite}
+.loading-dots i:nth-child(2){animation-delay:.2s}
+.loading-dots i:nth-child(3){animation-delay:.4s}
+@keyframes dotPulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.1)}}
+
+/* Not found */
+.not-found{display:none}
+.not-found-icon{width:80px;height:80px;border-radius:50%;background:var(--orange-50);display:grid;place-items:center;font-size:2.2rem;margin:0 auto 20px}
+.not-found h3{margin-bottom:8px}
+.not-found p{margin-bottom:28px}
+.not-found-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.not-found-alt{background:var(--soft);border-radius:var(--radius);padding:24px;text-align:left;margin-top:24px}
+.not-found-alt h4{font-size:.9rem;margin-bottom:12px;color:var(--navy)}
+.not-found-alt .btn{margin-bottom:8px}
+
+/* ── Result Card ── */
+.result-section{display:none;padding-top:40px}
+.result-card{background:#fff;border-radius:28px;border:1px solid var(--line);box-shadow:var(--shadow);overflow:hidden;animation:slideUp .6s var(--ease)}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.result-head{padding:28px;background:linear-gradient(120deg,var(--navy),var(--navy-700));display:flex;gap:22px;align-items:center;flex-wrap:wrap;position:relative;overflow:hidden}
+.result-head::before{content:'';position:absolute;right:-50px;top:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(18,183,106,.4),transparent 70%)}
+.result-prod{display:flex;gap:16px;align-items:center;flex:1;min-width:230px;position:relative;z-index:1}
+.prod-thumb{width:76px;height:76px;border-radius:18px;overflow:hidden;flex-shrink:0;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);display:grid;place-items:center;font-size:1.8rem}
+.prod-thumb img{width:100%;height:100%;object-fit:cover}
+.result-prod h3{color:#fff;font-size:1.08rem;margin-bottom:3px}
+.result-prod small{color:rgba(255,255,255,.65);font-size:.78rem;display:block}
+.result-prod .code{color:rgba(255,255,255,.5);font-size:.72rem;font-weight:600;letter-spacing:.05em;margin-top:4px;display:block}
+.score-ring{width:88px;height:88px;border-radius:50%;display:grid;place-items:center;position:relative;flex-shrink:0;background:conic-gradient(var(--ring-color,var(--green)) calc(var(--p)*1%),rgba(255,255,255,.15) 0);z-index:1}
+.score-ring::after{content:'';position:absolute;inset:7px;border-radius:50%;background:var(--navy)}
+.score-ring span{position:relative;z-index:2;font-weight:800;color:#fff;font-size:1.25rem;letter-spacing:-.03em}
+.score-ring small{position:absolute;bottom:15px;font-size:.5rem;color:rgba(255,255,255,.55);z-index:2;font-weight:700;letter-spacing:.08em}
+
+.result-body{padding:28px}
+
+/* Summary box */
+.summary-box{
+  background:linear-gradient(135deg,var(--green-50),var(--navy-50));
+  border-radius:var(--radius);padding:22px 24px;margin-bottom:24px;
+  border:1px solid var(--green-100);
+}
+.summary-box h4{font-size:.92rem;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.summary-box p{font-size:.9rem;color:var(--ink);line-height:1.7}
+
+/* Nutrition grid */
+.nutrition-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.nutri-card{
+  background:var(--soft);border-radius:16px;padding:18px 14px;text-align:center;
+  border:1px solid transparent;transition:.3s var(--ease);
+}
+.nutri-card:hover{background:#fff;border-color:var(--line);box-shadow:var(--shadow-sm)}
+.nutri-card .val{font-size:1.2rem;font-weight:800;color:var(--navy);letter-spacing:-.02em;line-height:1.2}
+.nutri-card .unit{font-size:.68rem;color:var(--muted);font-weight:600;margin-top:2px}
+.nutri-card .label{font-size:.72rem;color:var(--muted);font-weight:600;margin-top:6px}
+.nutri-card.warn{background:var(--orange-50);border-color:#ffdfc2}
+.nutri-card.warn .val{color:#c96a22}
+.nutri-card.ok{background:var(--green-50);border-color:var(--green-100)}
+.nutri-card.ok .val{color:var(--green-600)}
+
+/* Tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:14px}
+.tab{padding:9px 16px;border-radius:100px;font-size:.82rem;font-weight:700;color:var(--muted);background:var(--soft);transition:.3s var(--ease);white-space:nowrap}
+.tab:hover{color:var(--navy);background:#e9f1f9}
+.tab.active{background:var(--navy);color:#fff;box-shadow:0 6px 16px rgba(11,37,69,.2)}
+.tab-panel{display:none;animation:fadeUp .4s var(--ease)}
+.tab-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* Ingredient list */
+.ing-list{display:flex;flex-direction:column;gap:8px}
+.ing-item{display:flex;align-items:center;gap:12px;padding:12px 15px;border-radius:14px;background:#fff;border:1px solid var(--line);transition:.3s var(--ease)}
+.ing-item:hover{border-color:#cfe3f5;transform:translateX(4px)}
+.ing-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ing-dot.g{background:var(--green)}
+.ing-dot.o{background:var(--orange)}
+.ing-dot.r{background:var(--red)}
+.ing-dot.p{background:var(--purple)}
+.ing-item b{font-size:.86rem;color:var(--navy);font-weight:700}
+.ing-item small{display:block;font-size:.74rem;color:var(--muted);font-weight:500}
+.ing-tag{margin-left:auto;font-size:.68rem;font-weight:800;padding:4px 10px;border-radius:100px;white-space:nowrap}
+.tag-safe{background:var(--green-50);color:var(--green-600)}
+.tag-mid{background:var(--orange-50);color:#c96a22}
+.tag-bad{background:var(--red-50);color:var(--red)}
+.tag-info{background:var(--purple-50);color:var(--purple)}
+
+/* Alert boxes */
+.alert-box{display:flex;gap:13px;padding:15px 17px;border-radius:16px;margin-bottom:12px;background:var(--orange-50);border:1px solid #ffdfc2}
+.alert-box.danger{background:var(--red-50);border-color:#f8d3d3}
+.alert-box.safe{background:var(--green-50);border-color:#c7ebd8}
+.alert-box i{font-style:normal;font-size:1.1rem;line-height:1.3}
+.alert-box b{display:block;font-size:.88rem;color:var(--navy);margin-bottom:3px}
+.alert-box p{font-size:.82rem;color:var(--muted)}
+
+/* AI block */
+.ai-block{
+  background:linear-gradient(135deg,var(--purple-50),#f8f5ff);
+  border:1px solid #e4d9ff;border-radius:var(--radius);padding:22px 24px;margin-top:24px;
+}
+.ai-block h4{font-size:.92rem;margin-bottom:10px;display:flex;align-items:center;gap:8px;color:var(--purple)}
+.ai-block p{font-size:.9rem;color:var(--ink);line-height:1.75;white-space:pre-line}
+
+/* Reviews */
+.review{display:flex;gap:12px;padding:15px;border-radius:16px;background:var(--soft);margin-bottom:10px}
+.avatar{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-weight:800;color:#fff;font-size:.82rem;flex-shrink:0}
+.av-1{background:linear-gradient(135deg,var(--green),#0ea5a5)}
+.av-2{background:linear-gradient(135deg,var(--purple),#5b8def)}
+.av-3{background:linear-gradient(135deg,var(--orange),#f25c5c)}
+.review-body{flex:1}
+.review-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.review-top b{font-size:.85rem;color:var(--navy)}
+.stars{display:flex;gap:2px;color:#f5a623;font-size:.82rem}
+.review p{font-size:.85rem;line-height:1.6}
+
+/* Similar */
+.similar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.sim-card{padding:16px;border-radius:16px;border:1px solid var(--line);background:#fff;text-align:center;transition:.35s var(--ease);cursor:pointer}
+.sim-card:hover{transform:translateY(-5px);box-shadow:var(--shadow);border-color:transparent}
+.sim-emoji{font-size:1.5rem;margin-bottom:8px}
+.sim-card b{display:block;font-size:.8rem;color:var(--navy);margin-bottom:3px}
+.sim-card small{font-size:.7rem;color:var(--muted);display:block;margin-bottom:8px}
+.sim-score{font-size:.72rem;font-weight:800;padding:4px 10px;border-radius:100px;display:inline-block}
+.sim-score.hi{background:var(--green-50);color:var(--green-600)}
+.sim-score.mid{background:var(--orange-50);color:#c96a22}
+
+/* Upload area */
+.upload-area{
+  border:2px dashed var(--line);border-radius:var(--radius);padding:40px 24px;
+  text-align:center;transition:.3s var(--ease);cursor:pointer;background:var(--soft);
+}
+.upload-area:hover{border-color:var(--green);background:var(--green-50)}
+.upload-area.dragover{border-color:var(--green);background:var(--green-50);transform:scale(1.01)}
+.upload-icon{font-size:2.2rem;margin-bottom:12px}
+.upload-area h4{font-size:.95rem;margin-bottom:6px}
+.upload-area p{font-size:.82rem}
+
+/* ── Features ── */
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.f-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px 24px;transition:.4s var(--ease);position:relative;overflow:hidden}
+.f-card:hover{transform:translateY(-7px);box-shadow:var(--shadow);border-color:transparent}
+.f-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;font-size:1.2rem;margin-bottom:16px;transition:.4s var(--ease)}
+.f-card:hover .f-icon{transform:scale(1.08) rotate(-5deg)}
+.f-card h3{font-size:.98rem;margin-bottom:8px}
+.f-card p{font-size:.86rem;line-height:1.6}
+.fi-1{background:var(--green-50)}.fi-2{background:var(--navy-50)}.fi-3{background:var(--purple-50)}.fi-4{background:var(--orange-50)}
+.fi-5{background:var(--red-50)}.fi-6{background:#e8f7f7}.fi-7{background:#fdf6e3}.fi-8{background:var(--navy-50)}
+
+/* ── How it works ── */
+.how{background:var(--navy);color:#fff;overflow:hidden}
+.how::before{content:'';position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(18,183,106,.18),transparent 65%);pointer-events:none}
+.how h2{color:#fff}
+.how .sec-head p{color:rgba(255,255,255,.72)}
+.how .eyebrow{background:rgba(18,183,106,.18);color:#5ee8a5}
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;position:relative;z-index:1}
+.how-card{padding:30px 24px;border-radius:var(--radius);background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);transition:.4s var(--ease)}
+.how-card:hover{background:rgba(255,255,255,.09);transform:translateY(-7px);border-color:rgba(18,183,106,.5)}
+.how-num{font-size:2.2rem;font-weight:800;line-height:1;background:linear-gradient(140deg,var(--green),#5ee8a5);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:14px;display:block}
+.how-card h3{color:#fff;font-size:1rem;margin-bottom:9px}
+.how-card p{color:rgba(255,255,255,.65);font-size:.86rem}
+
+/* ── Audience ── */
+.aud{background:var(--soft)}
+.aud-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.aud-card{background:#fff;border-radius:var(--radius);padding:28px 24px;border:1px solid var(--line);transition:.4s var(--ease)}
+.aud-card:hover{transform:translateY(-7px);box-shadow:var(--shadow);border-color:transparent}
+.aud-emoji{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:1.4rem;margin-bottom:16px;background:var(--green-50)}
+.aud-card:nth-child(2) .aud-emoji{background:var(--purple-50)}
+.aud-card:nth-child(3) .aud-emoji{background:var(--orange-50)}
+.aud-card:nth-child(4) .aud-emoji{background:var(--navy-50)}
+.aud-card:nth-child(5) .aud-emoji{background:#e8f7f7}
+.aud-card:nth-child(6) .aud-emoji{background:#fdf6e3}
+.aud-card h3{font-size:1rem;margin-bottom:8px}
+.aud-card p{font-size:.86rem}
+
+/* ── Final CTA ── */
+.final-cta{padding:0 0 96px}
+.cta-box{background:linear-gradient(125deg,var(--navy) 0%,var(--navy-700) 55%,#0d4a45 100%);border-radius:34px;padding:70px 48px;text-align:center;position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;top:-140px;right:-100px;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(18,183,106,.4),transparent 68%)}
+.cta-box::after{content:'';position:absolute;bottom:-160px;left:-110px;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,255,.32),transparent 68%)}
+.cta-box > *{position:relative;z-index:1}
+.cta-box h2{color:#fff;max-width:720px;margin:0 auto 18px}
+.cta-box p{color:rgba(255,255,255,.76);max-width:560px;margin:0 auto 34px;font-size:1.02rem}
+.cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-white{background:#fff;color:var(--navy)}
+.btn-white:hover{background:#f0f5fa;transform:translateY(-2px)}
+.btn-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.3)}
+.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,.08);transform:translateY(-2px)}
+.cta-flow{margin-top:40px;display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;font-size:.8rem;font-weight:800;letter-spacing:.14em;color:rgba(255,255,255,.55)}
+.cta-flow .sep{color:var(--green)}
+
+/* ── Footer ── */
+footer{background:var(--navy);color:rgba(255,255,255,.65);padding:64px 0 30px}
+.foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:44px;margin-bottom:48px}
+.foot-brand .logo{color:#fff;margin-bottom:16px}
+.foot-brand p{font-size:.86rem;max-width:300px;color:rgba(255,255,255,.6)}
+.foot-social{display:flex;gap:10px;margin-top:20px}
+.foot-social a{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:.9rem;transition:.3s var(--ease)}
+.foot-social a:hover{background:var(--green);transform:translateY(-3px)}
+.foot-col h4{color:#fff;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:18px;font-weight:800}
+.foot-col a{display:block;font-size:.86rem;padding:6px 0;transition:.25s}
+.foot-col a:hover{color:var(--green);transform:translateX(4px)}
+.foot-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.82rem}
+.foot-credit{color:rgba(255,255,255,.5)}
+.foot-credit b{color:var(--green);font-weight:700}
+
+/* ── Toast ── */
+.toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--navy);color:#fff;padding:14px 24px;border-radius:100px;
+  font-size:.88rem;font-weight:600;box-shadow:var(--shadow-lg);z-index:2000;
+  opacity:0;transition:.4s var(--ease);max-width:90vw;text-align:center;
+}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.error{background:var(--red)}
+.toast.success{background:var(--green)}
+
+/* ── Modal ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(11,37,69,.5);backdrop-filter:blur(6px);
+  z-index:1500;display:none;align-items:center;justify-content:center;padding:20px;
+  opacity:0;transition:.3s var(--ease);
+}
+.modal-overlay.show{display:flex;opacity:1}
+.modal{
+  background:#fff;border-radius:24px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto;
+  padding:32px;animation:modalIn .4s var(--ease);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(20px)}to{opacity:1;transform:none}}
+.modal h3{margin-bottom:8px}
+.modal > p{font-size:.9rem;margin-bottom:24px}
+.modal-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:1.1rem;color:var(--muted);transition:.25s}
+.modal-close:hover{background:var(--red-50);color:var(--red)}
+.modal-wrap{position:relative}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:.82rem;font-weight:700;color:var(--navy);margin-bottom:6px}
+.form-group input,.form-group textarea{
+  width:100%;padding:12px 16px;border-radius:14px;border:1.5px solid var(--line);
+  font-size:.9rem;font-family:inherit;outline:none;transition:.3s;
+}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(18,183,106,.12)}
+.form-group textarea{min-height:100px;resize:vertical}
+
+/* ── Responsive ── */
+@media(max-width:1024px){
+  .hero-grid{grid-template-columns:1fr;gap:56px}
+  .hero-visual{order:-1}
+  .phone{max-width:320px}
+  .chip-1{left:0}.chip-2{right:0}
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .how-grid{grid-template-columns:repeat(2,1fr)}
+  .nutrition-grid{grid-template-columns:repeat(2,1fr)}
+  .foot-grid{grid-template-columns:1fr 1fr;gap:36px}
+}
+@media(max-width:860px){
+  .nav-links{
+    position:absolute;top:70px;left:16px;right:16px;background:#fff;
+    border-radius:20px;box-shadow:var(--shadow-lg);flex-direction:column;
+    align-items:stretch;padding:14px;gap:4px;border:1px solid var(--line);
+    opacity:0;visibility:hidden;transform:translateY(-12px);transition:.35s var(--ease);
+  }
+  .nav-links.open{opacity:1;visibility:visible;transform:none}
+  .nav-links a{padding:13px 16px;font-size:.94rem}
+  .burger{display:flex}
+  .nav-right .btn{display:none}
+  section{padding:72px 0}
+  .problem-grid,.aud-grid{grid-template-columns:1fr}
+  .similar-grid{grid-template-columns:1fr}
+  .hero-stats{gap:26px}
+  .manual-input{flex-direction:column}
+  .manual-input input{width:100%}
+  .not-found-actions .btn{width:100%}
+}
+@media(max-width:560px){
+  .container{padding:0 18px}
+  .hero{padding:120px 0 64px}
+  .features-grid,.how-grid{grid-template-columns:1fr}
+  .nutrition-grid{grid-template-columns:repeat(2,1fr)}
+  .cta-box{padding:48px 24px;border-radius:26px}
+  .result-head{padding:20px}
+  .result-body{padding:20px}
+  .foot-grid{grid-template-columns:1fr}
+  .hero-actions .btn{width:100%}
+  .float-chip{font-size:.68rem;padding:8px 11px}
+  .scan-state{padding:32px 18px}
+  .modal{padding:24px}
+  .tabs{gap:4px}
+  .tab{padding:8px 12px;font-size:.78rem}
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition-duration:.01ms!important}
+  [data-reveal]{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ NAV ═══════════════ -->
+<header class="nav" id="nav">
+  <div class="container nav-inner">
+    <a href="#home" class="logo">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+          <path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>
+          <path d="M3 12h18"/>
+        </svg>
+      </span>
+      Scan<span>&</span>Know
+    </a>
+    <nav class="nav-links" id="navLinks">
+      <a href="#muammo">Muammo</a>
+      <a href="#skaner">Skaner</a>
+      <a href="#xususiyatlar">Xususiyatlar</a>
+      <a href="#qanday">Qanday ishlaydi</a>
+      <a href="#kimlar">Kimlar uchun</a>
+    </nav>
+    <div class="nav-right">
+      <a href="#skaner" class="btn btn-primary btn-sm">Skanerlash</a>
+      <button class="burger" id="burger" aria-label="Menyu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero" id="home">
+  <div class="container hero-grid">
+    <div data-reveal>
+      <span class="eyebrow">🔬 Scan → Understand → Choose</span>
+      <h1>Har bir yangi tovar — endi <span class="grad">to‘liq shaffof!</span></h1>
+      <p class="lead">
+        Scan&Know mahsulot shtrix-kodini skanerlaydi va <b>haqiqiy</b> ma’lumotlar bazasidan
+        tarkibi, E-qo‘shimchalari, allergenlari, ozuqaviy qiymati va AI tahlilini bir zumda taqdim etadi.
+      </p>
+      <div class="hero-actions">
+        <a href="#skaner" class="btn btn-primary btn-lg">📷 Tovarni tekshirish</a>
+        <a href="#qanday" class="btn btn-ghost btn-lg">Qanday ishlaydi?</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><b data-count="500" data-suffix="K+">0</b><span>Mahsulot bazasi</span></div>
+        <div class="stat"><b data-count="12" data-suffix="K+">0</b><span>E-qo‘shimcha izohi</span></div>
+        <div class="stat"><b data-count="98" data-suffix="%">0</b><span>Tahlil aniqligi</span></div>
+      </div>
+    </div>
+    <div class="hero-visual" data-reveal data-delay="120">
+      <div class="float-chip chip-1"><i>⚠️</i> Allergen topildi</div>
+      <div class="float-chip chip-2"><i>🤖</i> AI tahlil</div>
+      <div class="float-chip chip-3"><i>✅</i> Xavfsiz tarkib</div>
+      <div class="phone">
+        <div class="phone-top">
+          <span class="phone-title">Skaner</span>
+          <span class="dot-live"><i></i> Jonli</span>
+        </div>
+        <div class="scan-box">
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+          <div class="barcode"></div>
+          <div class="scanline"></div>
+        </div>
+        <div class="mini-result">
+          <div class="mini-score">7.8</div>
+          <div><b>Bio Yogurt — Tabiiy</b><small>Tarkib toza · 1 allergen</small></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ PROBLEM ═══════════════ -->
+<section class="problem" id="muammo">
+  <div class="container">
+    <div class="sec-head" data-reveal>
+      <span class="eyebrow orange">Muammo</span>
+      <h2>Nega mahsulot yorliqlarini tushunish qiyin?</h2>
+      <p>Xaridor har kuni o‘nlab qaror qabul qiladi — lekin yorliqdagi ma’lumotlar buning uchun yaratilmagan.</p>
+    </div>
+    <div class="problem-grid">
+      <article class="p-card" data-reveal>
+        <div class="p-icon red">🔍</div>
+        <h3>Juda mayda va zich matn</h3>
+        <p>Tarkib kichik shriftda, ko‘p qatorli ro‘yxat ko‘rinishida yozilgan. Uni do‘konda turib o‘qish deyarli imkonsiz.</p>
+      </article>
+      <article class="p-card" data-reveal data-delay="90">
+        <div class="p-icon orange">🧪</div>
+        <h3>E-kodlar tushunarsiz</h3>
+        <p>«E440», «E330», «E160a» — bu kodlar ortida nima turishini oddiy xaridor bilmaydi. Har birini qidirish esa vaqt oladi.</p>
+      </article>
+      <article class="p-card" data-reveal data-delay="180">
+        <div class="p-icon purple">⚠️</div>
+        <h3>Allergenlar yashiringan</h3>
+        <p>Allergiya haqidagi ma’lumot ko‘pincha kichik izohda qolib ketadi. Bu esa ba’zi odamlar uchun xavfli oqibatlarga olib keladi.</p>
+      </article>
+    </div>
+    <div class="problem-quote" data-reveal>
+      <p>«Xaridor mahsulotni tanlashda 6 soniyadan ko‘p vaqt sarflamaydi. Biz esa o‘sha 6 soniyaga butun tahlilni sig‘dirdik.»</p>
+      <span class="pq-badge">Scan&Know yondashuvi</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SCANNER (REAL) ═══════════════ -->
+<section class="scanner-sec" id="skaner">
+  <div class="container">
+    <div class="sec-head" data-reveal>
+      <span class="eyebrow purple">📷 Jonli skaner</span>
+      <h2>Mahsulotni skanerlang</h2>
+      <p>Kamerani yoqing va shtrix-kodga qarating. Ma’lumotlar <b>Open Food Facts</b> bazasidan real vaqtda olinadi.</p>
+    </div>
+
+    <div class="scanner-container">
+      <!-- ── STATE: IDLE ── -->
+      <div class="scan-state" id="stateIdle">
+        <div style="font-size:3rem;margin-bottom:16px">📷</div>
+        <h3>Shtrix-kodni skanerlash</h3>
+        <p>Kameraga ruxsat bering va mahsulot shtrix-kodini ramka ichiga joylashtiring.</p>
+        <button class="btn btn-primary btn-lg" id="btnOpenCamera" style="width:100%;max-width:320px;margin:0 auto">
+          📷 Kamerani ochish
+        </button>
+        <div class="divider" style="max-width:420px;margin:24px auto">yoki</div>
+        <div class="manual-input">
+          <input type="text" id="manualBarcode" placeholder="Shtrix-kodni kiriting…" inputmode="numeric" pattern="[0-9]*">
+          <button class="btn btn-dark" id="btnManualSearch">Qidirish</button>
+        </div>
+      </div>
+
+      <!-- ── STATE: CAMERA ── -->
+      <div class="scan-state" id="stateCamera" style="display:none">
+        <div id="qr-reader"></div>
+        <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" id="btnSwitchCamera">🔄 Kamerani almashtirish</button>
+          <button class="btn btn-danger btn-sm" id="btnStopCamera">✕ To‘xtatish</button>
+        </div>
+        <p style="margin-top:14px;font-size:.8rem;color:var(--muted)">Shtrix-kod avtomatik aniqlanadi</p>
+      </div>
+
+      <!-- ── STATE: LOADING ── -->
+      <div class="loading-state" id="stateLoading">
+        <div class="loader"></div>
+        <b id="loadingText">Ma’lumot qidirilmoqda…</b>
+        <small id="loadingSub">Open Food Facts bazasidan</small>
+        <div class="loading-dots"><i></i><i></i><i></i></div>
+      </div>
+
+      <!-- ── STATE: NOT FOUND ── -->
+      <div class="scan-state not-found" id="stateNotFound">
+        <div class="not-found-icon">🔎</div>
+        <h3>Product not found in the database</h3>
+        <p>«<span id="notFoundBarcode"></span>» shtrix-kodi Open Food Facts bazasida topilmadi.</p>
+        <div class="not-found-actions">
+          <button class="btn btn-primary" id="btnUploadPhoto">📸 Mahsulot rasmini yuklash</button>
+          <button class="btn btn-ghost" id="btnManualEntry">✏️ Ma’lumotni qo‘lda kiritish</button>
+        </div>
+        <div class="not-found-alt">
+          <h4>💡 Nima qilish mumkin?</h4>
+          <p style="font-size:.84rem;margin-bottom:12px">Mahsulot rasmini yuklang — biz OCR texnologiyasi orqali tarkibni o‘qib tahlil qilamiz. Yoki ma’lumotlarni qo‘lda kiriting.</p>
+          <button class="btn btn-ghost btn-sm" id="btnScanAgain" style="width:100%">🔄 Qayta skanerlash</button>
+        </div>
+      </div>
+
+      <!-- ── STATE: RESULT ── -->
+      <div class="result-section" id="stateResult">
+        <div class="result-card" id="resultCard"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FEATURES ═══════════════ -->
+<section id="xususiyatlar">
+  <div class="container">
+    <div class="sec-head" data-reveal>
+      <span class="eyebrow">Xususiyatlar</span>
+      <h2>Bitta ilovada — 8 kuchli imkoniyat</h2>
+      <p>Scan&Know shunchaki skaner emas, balki ongli xarid qilish uchun to‘liq yordamchi.</p>
+    </div>
+    <div class="features-grid">
+      <article class="f-card" data-reveal><div class="f-icon fi-1">📷</div><h3>Bir skan — to‘liq ma’lumot</h3><p>Shtrix-kodni skanerlang va mahsulot haqidagi barcha ma’lumotni bir ekranda ko‘ring.</p></article>
+      <article class="f-card" data-reveal data-delay="60"><div class="f-icon fi-2">🗄️</div><h3>500 000+ mahsulot bazasi</h3><p>Open Food Facts — dunyodagi eng katta ochiq oziq-ovqat bazasi.</p></article>
+      <article class="f-card" data-reveal data-delay="120"><div class="f-icon fi-3">🤖</div><h3>AI tahlil</h3><p>Sun’iy intellekt tarkibni o‘qib, oddiy o‘zbek tilida xulosa beradi.</p></article>
+      <article class="f-card" data-reveal data-delay="180"><div class="f-icon fi-4">⚠️</div><h3>Allergen ogohlantirish</h3><p>Allergenlar aniqlansa, darhol ogohlantirish olasiz.</p></article>
+      <article class="f-card" data-reveal data-delay="60"><div class="f-icon fi-5">🧪</div><h3>E-qo‘shimchalar lug‘ati</h3><p>Har bir E-kod nima uchun ishlatiladi va qanchalik xavfsiz — batafsil izoh.</p></article>
+      <article class="f-card" data-reveal data-delay="120"><div class="f-icon fi-6">🎯</div><h3>Shaxsiy tavsiyalar</h3><p>Maqsadingizga qarab mos mahsulotlar tavsiya etiladi.</p></article>
+      <article class="f-card" data-reveal data-delay="180"><div class="f-icon fi-7">🔄</div><h3>Sog‘lom alternativalar</h3><p>Xuddi shu toifadagi, lekin tarkibi yaxshiroq mahsulotlarni ko‘rsatadi.</p></article>
+      <article class="f-card" data-reveal data-delay="240"><div class="f-icon fi-8">📚</div><h3>Sevimlilar va tarix</h3><p>Skanerlangan mahsulotlar tarixini saqlang va sevimlilar ro‘yxatini yuritib boring.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+<section class="how" id="qanday">
+  <div class="container">
+    <div class="sec-head" data-reveal>
+      <span class="eyebrow">Qanday ishlaydi</span>
+      <h2>To‘rt oddiy qadam</h2>
+      <p>Ro‘yxatdan o‘tish shart emas — birinchi skandan boshlab foydalanishingiz mumkin.</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-card" data-reveal><span class="how-num">01</span><h3>Skanerlang</h3><p>Ilovani ochib, mahsulot shtrix-kodiga kamerani qarating.</p></div>
+      <div class="how-card" data-reveal data-delay="90"><span class="how-num">02</span><h3>Ma’lumot topiladi</h3><p>Tizim Open Food Facts bazasidan mahsulot ma’lumotlarini yuklaydi.</p></div>
+      <div class="how-card" data-reveal data-delay="180"><span class="how-num">03</span><h3>AI tahlil qiladi</h3><p>Sun’iy intellekt tarkibni tekshiradi va siz uchun muhim joylarni ajratadi.</p></div>
+      <div class="how-card" data-reveal data-delay="270"><span class="how-num">04</span><h3>Tanlang</h3><p>Aniq xulosa asosida ongli qaror qabul qilasiz.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ AUDIENCE ═══════════════ -->
+<section class="aud" id="kimlar">
+  <div class="container">
+    <div class="sec-head" data-reveal>
+      <span class="eyebrow navy">Kimlar uchun?</span>
+      <h2>Scan&Know har kimga foydali</h2>
+      <p>Xarid qilish odatiy jarayon — lekin u har xil odam uchun har xil ma’noga ega.</p>
+    </div>
+    <div class="aud-grid">
+      <div class="aud-card" data-reveal><div class="aud-emoji">👨‍👩‍👧</div><h3>Ota-onalar</h3><p>Bolaga qaysi mahsulot xavfsiz ekanini tez va aniq bilish uchun.</p></div>
+      <div class="aud-card" data-reveal data-delay="70"><div class="aud-emoji">🥗</div><h3>Sog‘lom ovqatlanish tarafdorlari</h3><p>Shakar, tuz va qo‘shimchalar miqdorini nazorat qilish uchun.</p></div>
+      <div class="aud-card" data-reveal data-delay="140"><div class="aud-emoji">⚠️</div><h3>Allergiyasi borlar</h3><p>Allergenlarni darhol aniqlab, xavfli mahsulotdan qochish uchun.</p></div>
+      <div class="aud-card" data-reveal data-delay="70"><div class="aud-emoji">💪</div><h3>Sportchilar</h3><p>Protein, kaloriya va tarkib tozaligini kuzatish uchun.</p></div>
+      <div class="aud-card" data-reveal data-delay="140"><div class="aud-emoji">🛒</div><h3>Oddiy xaridorlar</h3><p>Do‘konda turib to‘g‘ri tanlov qilish uchun tezkor yordamchi.</p></div>
+      <div class="aud-card" data-reveal data-delay="210"><div class="aud-emoji">🏪</div><h3>Do‘konlar va marketpleyslar</h3><p>Mahsulot kartochkalarini boyitish va mijoz ishonchini oshirish uchun API.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FINAL CTA ═══════════════ -->
+<section class="final-cta">
+  <div class="container">
+    <div class="cta-box" data-reveal>
+      <h2>Bugundan boshlab ongli tanlov qiling</h2>
+      <p>Scan&Know bilan har bir xarid — ishonchli va shaffof. Bir skan, to‘liq tushuncha.</p>
+      <div class="cta-actions">
+        <a href="#skaner" class="btn btn-white btn-lg">📷 Tovarni tekshirish →</a>
+        <a href="#xususiyatlar" class="btn btn-outline btn-lg">Batafsil ma’lumot</a>
+      </div>
+      <div class="cta-flow">SCAN <span class="sep">→</span> UNDERSTAND <span class="sep">→</span> CHOOSE</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#home" class="logo">
+          <span class="logo-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/>
+              <path d="M3 12h18"/>
+            </svg>
+          </span>
+          Scan<span style="color:var(--green)">&</span>Know
+        </a>
+        <p>Mahsulot shtrix-kodini skanerlang va tarkibini bir zumda tushuning. Shaffof xarid — sog‘lom tanlov.</p>
+        <div class="foot-social">
+          <a href="#" aria-label="Telegram">✈️</a>
+          <a href="#" aria-label="Instagram">📸</a>
+          <a href="#" aria-label="YouTube">▶️</a>
+          <a href="#" aria-label="LinkedIn">in</a>
+        </div>
+      </div>
+      <div class="foot-col"><h4>Mahsulot</h4><a href="#xususiyatlar">Xususiyatlar</a><a href="#skaner">Skaner</a><a href="#qanday">Qanday ishlaydi</a></div>
+      <div class="foot-col"><h4>Kompaniya</h4><a href="#">Biz haqimizda</a><a href="#">Blog</a><a href="#">Aloqa</a></div>
+      <div class="foot-col"><h4>Yordam</h4><a href="#">FAQ</a><a href="#">Maxfiylik siyosati</a><a href="#">Foydalanish shartlari</a></div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2025 Scan&Know. Barcha huquqlar himoyalangan.</span>
+      <span class="foot-credit">Created by <b>Abubakr Akhmadjanov</b></span>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════ UPLOAD MODAL ═══════════════ -->
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal-wrap">
+    <div class="modal">
+      <button class="modal-close" id="btnCloseUpload">✕</button>
+      <h3>📸 Mahsulot rasmini yuklash</h3>
+      <p>Mahsulot qadoqidagi tarkib ro‘yxatini suratga oling. Biz OCR texnologiyasi orqali tarkibni o‘qib tahlil qilamiz.</p>
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">📤</div>
+        <h4>Rasmni bu yerga tashlang</h4>
+        <p>yoki bosib faylni tanlang (JPG, PNG, WEBP)</p>
+        <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
+      </div>
+      <div id="uploadPreview" style="display:none;margin-top:16px">
+        <img id="previewImg" style="width:100%;border-radius:16px;max-height:260px;object-fit:cover">
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btn-primary" id="btnAnalyzeImage" style="flex:1">🤖 Tahlil qilish</button>
+          <button class="btn btn-ghost" id="btnRemoveImage">O‘chirish</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MANUAL ENTRY MODAL ═══════════════ -->
+<div class="modal-overlay" id="manualModal">
+  <div class="modal-wrap">
+    <div class="modal">
+      <button class="modal-close" id="btnCloseManual">✕</button>
+      <h3>✏️ Ma’lumotni qo‘lda kiritish</h3>
+      <p>Mahsulot topilmadi. Quyidagi ma’lumotlarni to‘ldiring va AI tahlil qiladi.</p>
+      <form id="manualForm">
+        <div class="form-group"><label>Mahsulot nomi *</label><input type="text" id="manualName" required placeholder="Masalan: Bio Yogurt"></div>
+        <div class="form-group"><label>Brend</label><input type="text" id="manualBrand" placeholder="Masalan: BioLine"></div>
+        <div class="form-group"><label>Tarkib (ingredientlar) *</label><textarea id="manualIngredients" required placeholder="Sut, shakar, qulupnay sharbati, pektin (E440), limon kislotasi (E330)…"></textarea></div>
+        <div class="form-group"><label>Allergenlar</label><input type="text" id="manualAllergens" placeholder="Sut, yong‘oq, gluten…"></div>
+        <button type="submit" class="btn btn-primary" style="width:100%">🤖 AI tahlil qilish</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ JAVASCRIPT ═══════════════ -->
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   SCAN&KNOW — Application Logic
+   Real barcode scanning → Open Food Facts API → AI Analysis
+   ═══════════════════════════════════════════════════════════════ */
+
+'use strict';
+
+/* ── Config ── */
+const CONFIG = {
+  OFF_API: 'https://world.openfoodfacts.org/api/v2/product',
+  OFF_SEARCH: 'https://world.openfoodfacts.org/api/v2/search',
+  USER_AGENT: 'ScanAndKnow/1.0 (contact@scanandknow.uz)',
+  AI_ENDPOINT: '/api/analyze',  // Backend proxy — keeps API key secure
+  MAX_UPLOAD_SIZE: 10 * 1024 * 1024, // 10 MB
+};
+
+/* ── State ── */
+const state = {
+  scanning: false,
+  html5QrCode: null,
+  currentCameraId: null,
+  cameras: [],
+  scannedBarcode: null,
+  uploadedFile: null,
+  lastResult: null,
+};
+
+/* ── DOM refs ── */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+const els = {
+  stateIdle: $('#stateIdle'),
+  stateCamera: $('#stateCamera'),
+  stateLoading: $('#stateLoading'),
+  stateNotFound: $('#stateNotFound'),
+  stateResult: $('#stateResult'),
+  loadingText: $('#loadingText'),
+  loadingSub: $('#loadingSub'),
+  notFoundBarcode: $('#notFoundBarcode'),
+  resultCard: $('#resultCard'),
+  qrReader: $('#qr-reader'),
+  manualBarcode: $('#manualBarcode'),
+  toast: $('#toast'),
+  uploadModal: $('#uploadModal'),
+  manualModal: $('#manualModal'),
+  uploadArea: $('#uploadArea'),
+  fileInput: $('#fileInput'),
+  uploadPreview: $('#uploadPreview'),
+  previewImg: $('#previewImg'),
+};
+
+/* ═══════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════ */
+
+function showToast(msg, type = '') {
+  els.toast.textContent = msg;
+  els.toast.className = 'toast show ' + type;
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => els.toast.classList.remove('show'), 3500);
+}
+
+function showState(name) {
+  ['Idle','Camera','Loading','NotFound','Result'].forEach(s => {
+    const el = els['state' + s];
+    if (el) el.style.display = 'none';
+  });
+  const target = els['state' + name];
+  if (target) target.style.display = name === 'Camera' ? 'block' : (name === 'Loading' ? 'block' : 'block');
+  if (name === 'Result') els.stateResult.style.display = 'block';
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function formatNum(n, decimals = 1) {
+  if (n === undefined || n === null || isNaN(n)) return '—';
+  return Number(n).toFixed(decimals);
+}
+
+/* ═══════════════════════════════════════════════
+   OPEN FOOD FACTS API
+   ═══════════════════════════════════════════════ */
+
+async function fetchProduct(barcode) {
+  const fields = [
+    'code','product_name','product_name_uz','product_name_en','product_name_ru',
+    'brands','quantity','image_front_url','image_url','image_ingredients_url','image_nutrition_url',
+    'ingredients_text','ingredients_text_uz','ingredients_text_en','ingredients_text_ru',
+    'allergens','allergens_tags','traces','traces_tags',
+    'additives_tags','additives_n','additives_original_tags',
+    'nutriments','nutrition_grades','nutriscore_grade','nova_group',
+    'categories_tags','labels_tags','ingredients_analysis_tags',
+    'ecoscore_grade','environmental_score_grade',
+    'nutrient_levels','nutrition_data_per','serving_size',
+    'product_type','unknown_ingredients_n','ingredients_n'
+  ].join(',');
+
+  const url = `${CONFIG.OFF_API}/${encodeURIComponent(barcode)}?fields=${fields}`;
+
+  const res = await fetch(url, {
+    headers: { 'User-Agent': CONFIG.USER_AGENT }
+  });
+
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+
+  // Check status: 0 = not found, 1 = found
+  if (data.status === 0 || !data.product) {
+    return null;
+  }
+  return data.product;
+}
+
+async function searchSimilarProducts(categories, currentBarcode) {
+  if (!categories || categories.length === 0) return [];
+  const cat = categories.find(c => c.includes('en:')) || categories[0];
+  const url = `${CONFIG.OFF_SEARCH}?categories_tags=${encodeURIComponent(cat)}&fields=code,product_name,brands,image_front_small_url,nutriscore_grade,nova_group,additives_n&page_size=6&sort_by=popularity_key`;
+
+  try {
+    const res = await fetch(url, { headers: { 'User-Agent': CONFIG.USER_AGENT } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.products || [])
+      .filter(p => p.code !== currentBarcode)
+      .slice(0, 3);
+  } catch { return []; }
+}
+
+/* ═══════════════════════════════════════════════
+   BARCODE SCANNER (html5-qrcode)
+   ═══════════════════════════════════════════════ */
+
+async function openCamera() {
+  try {
+    showState('Camera');
+
+    state.html5QrCode = new Html5Qrcode('qr-reader', {
+      formatsToSupport: [
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.EAN_8,
+        Html5QrcodeSupportedFormats.UPC_A,
+        Html5QrcodeSupportedFormats.UPC_E,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.QR_CODE,
+      ],
+      verbose: false,
+    });
+
+    const config = {
+      fps: 10,
+      qrbox: { width: 280, height: 160 },
+      aspectRatio: 1.777,
+      disableFlip: false,
+    };
+
+    // Try back camera first
+    let cameraId = null;
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      state.cameras = cameras;
+      if (cameras.length > 0) {
+        const back = cameras.find(c => /back|rear|environment/i.test(c.label));
+        cameraId = back ? back.id : cameras[cameras.length - 1].id;
+        state.currentCameraId = cameraId;
+      }
+    } catch (e) {
+      console.warn('Camera enumeration failed, using facingMode:', e);
+    }
+
+    const startConfig = cameraId
+      ? { deviceId: { exact: cameraId } }
+      : { facingMode: 'environment' };
+
+    await state.html5QrCode.start(
+      startConfig,
+      config,
+      onScanSuccess,
+      () => {} // ignore scan errors (normal during scanning)
+    );
+
+    state.scanning = true;
+  } catch (err) {
+    console.error('Camera error:', err);
+    showState('Idle');
+    if (err.name === 'NotAllowedError' || String(err).includes('Permission')) {
+      showToast('Kameraga ruxsat berilmadi. Brauzer sozlamalaridan ruxsat bering.', 'error');
+    } else if (err.name === 'NotFoundError') {
+      showToast('Kamera topilmadi. Qurilmada kamera mavjudligini tekshiring.', 'error');
+    } else {
+      showToast('Kamerani ochishda xatolik: ' + err.message, 'error');
+    }
+  }
+}
+
+function onScanSuccess(decodedText) {
+  // Prevent duplicate scans
+  if (state.scannedBarcode === decodedText) return;
+  state.scannedBarcode = decodedText;
+
+  // Vibrate feedback
+  if (navigator.vibrate) navigator.vibrate(80);
+
+  stopCamera().then(() => {
+    lookupProduct(decodedText);
+  });
+}
+
+async function stopCamera() {
+  if (state.html5QrCode && state.scanning) {
+    try {
+      await state.html5QrCode.stop();
+      state.html5QrCode.clear();
+    } catch (e) { /* ignore */ }
+    state.scanning = false;
+  }
+}
+
+async function switchCamera() {
+  if (!state.cameras || state.cameras.length < 2) {
+    showToast('Faqat bitta kamera mavjud.', 'error');
+    return;
+  }
+  const idx = state.cameras.findIndex(c => c.id === state.currentCameraId);
+  const next = state.cameras[(idx + 1) % state.cameras.length];
+  state.currentCameraId = next.id;
+
+  await stopCamera();
+  // Re-open with new camera
+  try {
+    state.html5QrCode = new Html5Qrcode('qr-reader');
+    await state.html5QrCode.start(
+      { deviceId: { exact: next.id } },
+      { fps: 10, qrbox: { width: 280, height: 160 } },
+      onScanSuccess,
+      () => {}
+    );
+    state.scanning = true;
+    showToast('Kamera almashtirildi: ' + (next.label || 'Kamera'));
+  } catch (e) {
+    showToast('Kamerani almashtirishda xatolik.', 'error');
+    showState('Idle');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   PRODUCT LOOKUP FLOW
+   ═══════════════════════════════════════════════ */
+
+async function lookupProduct(barcode) {
+  barcode = String(barcode).trim();
+  if (!/^\d{8,14}$/.test(barcode)) {
+    showToast('Shtrix-kod 8–14 raqamdan iborat bo‘lishi kerak.', 'error');
+    showState('Idle');
+    return;
+  }
+
+  showState('Loading');
+  els.loadingText.textContent = 'Ma’lumot qidirilmoqda…';
+  els.loadingSub.textContent = 'Open Food Facts bazasidan';
+
+  try {
+    const product = await fetchProduct(barcode);
+
+    if (!product) {
+      // ── NOT FOUND ──
+      state.scannedBarcode = barcode;
+      els.notFoundBarcode.textContent = barcode;
+      showState('NotFound');
+      return;
+    }
+
+    // ── FOUND: AI Analysis ──
+    els.loadingText.textContent = 'AI tahlil qilmoqda…';
+    els.loadingSub.textContent = 'Tarkib o‘rganilmoqda va o‘zbek tiliga tarjima qilinmoqda';
+
+    const analysis = await analyzeWithAI(product);
+
+    // ── RENDER ──
+    renderResult(product, analysis, barcode);
+
+  } catch (err) {
+    console.error('Lookup error:', err);
+    showState('NotFound');
+    els.notFoundBarcode.textContent = barcode;
+    if (err.message && err.message.includes('429')) {
+      showToast('Server band. Iltimos, birozdan so‘ng qayta urinib ko‘ring.', 'error');
+    } else if (err.message && err.message.includes('Failed to fetch')) {
+      showToast('Internet aloqasi yo‘q. Ulanishni tekshiring.', 'error');
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   AI ANALYSIS (Backend Proxy)
+   ═══════════════════════════════════════════════ */
+
+async function analyzeWithAI(product) {
+  // Build a structured payload for the AI
+  const payload = {
+    barcode: product.code,
+    name: product.product_name || product.product_name_en || '',
+    brands: product.brands || '',
+    ingredients: product.ingredients_text || product.ingredients_text_en || product.ingredients_text_ru || '',
+    allergens: product.allergens_tags || product.allergens || '',
+    additives: product.additives_tags || [],
+    nutriments: {
+      energy_kcal: product.nutriments?.['energy-kcal_100g'],
+      fat: product.nutriments?.fat_100g,
+      saturated_fat: product.nutriments?.['saturated-fat_100g'],
+      carbohydrates: product.nutriments?.carbohydrates_100g,
+      sugars: product.nutriments?.sugars_100g,
+      fiber: product.nutriments?.fiber_100g,
+      proteins: product.nutriments?.proteins_100g,
+      salt: product.nutriments?.salt_100g,
+      sodium: product.nutriments?.sodium_100g,
+    },
+    nutriscore: product.nutriscore_grade || product.nutrition_grades,
+    nova_group: product.nova_group,
+  };
+
+  // Call backend proxy (keeps API key secure)
+  try {
+    const res = await fetch(CONFIG.AI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) throw new Error(`AI HTTP ${res.status}`);
+    const data = await res.json();
+    return data.analysis || generateFallbackAnalysis(product);
+  } catch (err) {
+    console.warn('AI endpoint unavailable, using client-side fallback:', err.message);
+    // Graceful fallback: generate analysis client-side
+    return generateFallbackAnalysis(product);
+  }
+}
+
+/**
+ * Client-side fallback analysis.
+ * Used when the backend AI proxy is not yet deployed.
+ * This produces a meaningful summary from raw OFF data.
+ */
+function generateFallbackAnalysis(product) {
+  const n = product.nutriments || {};
+  const sugar = n.sugars_100g;
+  const salt = n.salt_100g;
+  const fat = n.fat_100g;
+  const satFat = n['saturated-fat_100g'];
+  const nova = product.nova_group;
+  const additives = product.additives_n || 0;
+  const nutriscore = (product.nutriscore_grade || '').toUpperCase();
+
+  const lines = [];
+
+  // Overall assessment
+  if (nutriscore) {
+    const map = { A: 'Ajoyib tanlov!', B: 'Yaxshi mahsulot.', C: 'O‘rtacha — me’yorida iste’mol qiling.', D: 'Ehtiyot bo‘ling — tez-tez iste’mol qilmang.', E: 'Yuqori darajada qayta ishlangan — kam iste’mol qiling.' };
+    lines.push(`**Umumiy baho (Nutri-Score ${nutriscore}):** ${map[nutriscore] || 'Ma’lumot yetarli emas.'}`);
+  }
+
+  // NOVA group
+  if (nova) {
+    const novaMap = { 1: 'Qayta ishlanmagan yoki minimal qayta ishlangan.', 2: 'Qayta ishlangan oshxona ingredienti.', 3: 'Qayta ishlangan mahsulot.', 4: 'Ultra-qayta ishlangan mahsulot — tarkibida sanoat qo‘shimchalari ko‘p.' };
+    lines.push(`**NOVA guruhi ${nova}:** ${novaMap[nova] || ''}`);
+  }
+
+  // Sugar
+  if (sugar !== undefined && sugar !== null) {
+    const s = Number(sugar);
+    if (s > 22.5) lines.push(`**Shakar:** 100 g da ${formatNum(s)} g — bu **yuqori** ko‘rsatkich. Kuniga me’yordan oshirmang.`);
+    else if (s > 5) lines.push(`**Shakar:** 100 g da ${formatNum(s)} g — o‘rtacha daraja.`);
+    else lines.push(`**Shakar:** 100 g da ${formatNum(s)} g — past daraja. Yaxshi!`);
+  }
+
+  // Salt
+  if (salt !== undefined && salt !== null) {
+    const s = Number(salt);
+    if (s > 1.5) lines.push(`**Tuz:** 100 g da ${formatNum(s)} g — yuqori. Qon bosimi uchun ehtiyot bo‘ling.`);
+    else if (s > 0.3) lines.push(`**Tuz:** 100 g da ${formatNum(s)} g — o‘rtacha.`);
+    else lines.push(`**Tuz:** 100 g da ${formatNum(s)} g — past.`);
+  }
+
+  // Fat
+  if (fat !== undefined && fat !== null) {
+    const f = Number(fat);
+    if (satFat !== undefined && satFat !== null) {
+      lines.push(`**Yog‘:** umumiy ${formatNum(f)} g, shundan to‘yingan yog‘ ${formatNum(satFat)} g (100 g da).`);
+    } else {
+      lines.push(`**Yog‘:** 100 g da ${formatNum(f)} g.`);
+    }
+  }
+
+  // Additives
+  if (additives > 0) {
+    lines.push(`**E-qo‘shimchalar:** ${additives} ta aniqlangan. Pastdagi «E-qo‘shimchalar» bo‘limida batafsil ko‘ring.`);
+  } else {
+    lines.push(`**E-qo‘shimchalar:** aniqlanmadi. Bu yaxshi belgi. ✅`);
+  }
+
+  // Allergens
+  if (product.allergens_tags && product.allergens_tags.length > 0) {
+    const list = product.allergens_tags.map(a => a.replace('en:', '')).join(', ');
+    lines.push(`**Allergenlar:** ${list}. Allergiyangiz bo‘lsa, ehtiyot bo‘ling. ⚠️`);
+  }
+
+  // Ingredients count
+  if (product.ingredients_n) {
+    lines.push(`**Tarkib:** ${product.ingredients_n} ta ingredient. ${product.unknown_ingredients_n ? `Shundan ${product.unknown_ingredients_n} tasi noma’lum.` : ''}`);
+  }
+
+  return lines.join('\n\n');
+}
+
+/* ═══════════════════════════════════════════════
+   RESULT RENDERING
+   ═══════════════════════════════════════════════ */
+
+function renderResult(product, analysisText, barcode) {
+  state.lastResult = { product, analysisText, barcode };
+
+  const name = product.product_name || product.product_name_en || product.product_name_ru || 'Noma’lum mahsulot';
+  const brand = product.brands || '';
+  const image = product.image_front_url || product.image_url || '';
+  const quantity = product.quantity || '';
+  const nutriments = product.nutriments || {};
+  const nutriscore = (product.nutriscore_grade || product.nutrition_grades || '').toUpperCase();
+  const nova = product.nova_group;
+  const additives = product.additives_tags || [];
+  const allergens = product.allergens_tags || [];
+  const traces = product.traces_tags || [];
+
+  // Score
+  const score = computeScore(product);
+
+  // Ingredients
+  const ingredientsText = product.ingredients_text || product.ingredients_text_en || product.ingredients_text_ru || '';
+  const ingredientsList = parseIngredients(ingredientsText);
+
+  // ── Build HTML ──
+  let html = '';
+
+  // Head
+  html += `
+  <div class="result-head">
+    <div class="result-prod">
+      <div class="prod-thumb">${image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.parentElement.innerHTML='📦'">` : '📦'}</div>
+      <div>
+        <h3>${escapeHtml(name)}</h3>
+        <small>${escapeHtml(brand)}${quantity ? ' · ' + escapeHtml(quantity) : ''}</small>
+        <span class="code">${escapeHtml(barcode)}</span>
+      </div>
+    </div>
+    <div class="score-ring" style="--p:${score.value};--ring-color:${score.color}">
+      <span>${score.value}</span>
+      <small>BALL</small>
+    </div>
+  </div>`;
+
+  // Body
+  html += `<div class="result-body">`;
+
+  // Summary
+  html += `<div class="summary-box"><h4>📋 Xulosa</h4><p>${escapeHtml(score.summary)}</p></div>`;
+
+  // Nutrition grid
+  html += `<div class="nutrition-grid">`;
+  html += nutriCard('⚡', nutriments['energy-kcal_100g'], 'kkal', 'Kaloriya');
+  html += nutriCard('🧈', nutriments.fat_100g, 'g', 'Yog‘', nutriments.fat_100g > 20);
+  html += nutriCard('🍬', nutriments.sugars_100g, 'g', 'Shakar', nutriments.sugars_100g > 22.5, nutriments.sugars_100g < 5);
+  html += nutriCard('🧂', nutriments.salt_100g, 'g', 'Tuz', nutriments.salt_100g > 1.5, nutriments.salt_100g < 0.3);
+  html += `</div>`;
+
+  // Tabs
+  html += `<div class="tabs" id="resultTabs">
+    <button class="tab active" data-tab="tarkib">Tarkib</button>
+    <button class="tab" data-tab="eqoshimcha">E-qo‘shimchalar</button>
+    <button class="tab" data-tab="allergen">Allergenlar</button>
+    <button class="tab" data-tab="ozuqa">Ozuqaviy qiymat</button>
+    <button class="tab" data-tab="xavf">Xavflar</button>
+  </div>`;
+
+  // ── Panel: Tarkib ──
+  html += `<div class="tab-panel active" data-panel="tarkib">`;
+  if (ingredientsList.length > 0) {
+    html += `<div class="ing-list">`;
+    ingredientsList.forEach(ing => {
+      const tag = classifyIngredient(ing);
+      html += `<div class="ing-item">
+        <span class="ing-dot ${tag.dot}"></span>
+        <div><b>${escapeHtml(ing)}</b></div>
+        <span class="ing-tag ${tag.cls}">${tag.label}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="alert-box"><i>ℹ️</i><div><b>Tarkib ma’lumoti mavjud emas</b><p>Bu mahsulot uchun ingredientlar ro‘yxati hali kiritilmagan. Rasm yuklab, OCR orqali tahlil qilishingiz mumkin.</p></div></div>`;
+  }
+  html += `</div>`;
+
+  // ── Panel: E-qo'shimchalar ──
+  html += `<div class="tab-panel" data-panel="eqoshimcha">`;
+  if (additives.length > 0) {
+    html += `<div class="ing-list">`;
+    additives.forEach(a => {
+      const code = a.replace('en:', '').toUpperCase();
+      const info = getAdditiveInfo(code);
+      html += `<div class="ing-item">
+        <span class="ing-dot ${info.dot}"></span>
+        <div><b>${escapeHtml(code)}</b><small>${escapeHtml(info.desc)}</small></div>
+        <span class="ing-tag ${info.cls}">${info.label}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="alert-box safe"><i>✅</i><div><b>E-qo‘shimchalar aniqlanmadi</b><p>Bu mahsulotda sintetik qo‘shimchalar topilmadi. Bu ijobiy belgi.</p></div></div>`;
+  }
+  html += `</div>`;
+
+  // ── Panel: Allergenlar ──
+  html += `<div class="tab-panel" data-panel="allergen">`;
+  if (allergens.length > 0) {
+    allergens.forEach(a => {
+      const name = a.replace('en:', '').replace(/-/g, ' ');
+      html += `<div class="alert-box danger"><i>⚠️</i><div><b>${escapeHtml(name)}</b><p>Bu mahsulotda allergen mavjud. Allergiyangiz bo‘lsa, iste’mol qilmang.</p></div></div>`;
+    });
+  }
+  if (traces.length > 0) {
+    traces.forEach(t => {
+      const name = t.replace('en:', '').replace(/-/g, ' ');
+      html += `<div class="alert-box"><i>🔎</i><div><b>Iz qismida: ${escapeHtml(name)}</b><p>Ishlab chiqarish jarayonida bu allergen bilan aloqa bo‘lishi mumkin.</p></div></div>`;
+    });
+  }
+  if (allergens.length === 0 && traces.length === 0) {
+    html += `<div class="alert-box safe"><i>✅</i><div><b>Allergenlar aniqlanmadi</b><p>Ma’lumotlar bazasida bu mahsulot uchun allergen ma’lumoti yo‘q.</p></div></div>`;
+  }
+  html += `</div>`;
+
+  // ── Panel: Ozuqa ──
+  html += `<div class="tab-panel" data-panel="ozuqa">`;
+  html += `<div class="ing-list">`;
+  const nutriFields = [
+    ['Energiya', 'energy-kcal_100g', 'kkal'],
+    ['Yog‘', 'fat_100g', 'g'],
+    ['To‘yingan yog‘', 'saturated-fat_100g', 'g'],
+    ['Uglevodlar', 'carbohydrates_100g', 'g'],
+    ['Shakar', 'sugars_100g', 'g'],
+    ['Tolalar', 'fiber_100g', 'g'],
+    ['Oqsil', 'proteins_100g', 'g'],
+    ['Tuz', 'salt_100g', 'g'],
+    ['Natriy', 'sodium_100g', 'g'],
+  ];
+  nutriFields.forEach(([label, key, unit]) => {
+    const val = nutriments[key];
+    if (val !== undefined && val !== null) {
+      html += `<div class="ing-item"><div><b>${label}</b><small>${formatNum(val)} ${unit} / 100 g</small></div></div>`;
+    }
+  });
+  if (nutriments['energy-kcal_100g'] === undefined && nutriments.fat_100g === undefined) {
+    html += `<div class="alert-box"><i>ℹ️</i><div><b>Ozuqaviy ma’lumot mavjud emas</b><p>Bu mahsulot uchun ozuqaviy qiymat ma’lumotlari hali kiritilmagan.</p></div></div>`;
+  }
+  html += `</div></div>`;
+
+  // ── Panel: Xavflar ──
+  html += `<div class="tab-panel" data-panel="xavf">`;
+  const concerns = getConcerns(product);
+  if (concerns.length > 0) {
+    concerns.forEach(c => {
+      html += `<div class="alert-box ${c.type}"><i>${c.icon}</i><div><b>${c.title}</b><p>${c.text}</p></div></div>`;
+    });
+  } else {
+    html += `<div class="alert-box safe"><i>✅</i><div><b>Jiddiy xavflar aniqlanmadi</b><p>Bu mahsulot tarkibida xavfli komponentlar topilmadi.</p></div></div>`;
+  }
+  html += `</div>`;
+
+  // ── AI Analysis ──
+  if (analysisText) {
+    html += `<div class="ai-block"><h4>🤖 AI tahlili (o‘zbek tilida)</h4><p>${escapeHtml(analysisText)}</p></div>`;
+  }
+
+  // ── Similar products ──
+  html += `<div id="similarBlock"></div>`;
+
+  // Close body
+  html += `</div>`;
+
+  els.resultCard.innerHTML = html;
+  showState('Result');
+
+  // Load similar products async
+  if (product.categories_tags && product.categories_tags.length > 0) {
+    loadSimilarProducts(product.categories_tags, barcode);
+  }
+
+  // Init tabs
+  initTabs();
+
+  // Scroll to result
+  setTimeout(() => {
+    els.stateResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 150);
+}
+
+/* ── Score computation ── */
+function computeScore(product) {
+  let score = 5.0;
+  const n = product.nutriments || {};
+  const sugar = n.sugars_100g || 0;
+  const salt = n.salt_100g || 0;
+  const satFat = n['saturated-fat_100g'] || 0;
+  const protein = n.proteins_100g || 0;
+  const fiber = n.fiber_100g || 0;
+  const nova = product.nova_group || 4;
+  const additives = product.additives_n || 0;
+  const nutriscore = (product.nutriscore_grade || '').toUpperCase();
+
+  // Nutri-Score bonus
+  if (nutriscore === 'A') score += 2.5;
+  else if (nutriscore === 'B') score += 1.5;
+  else if (nutriscore === 'C') score += 0.5;
+  else if (nutriscore === 'D') score -= 0.8;
+  else if (nutriscore === 'E') score -= 1.5;
+
+  // NOVA penalty
+  if (nova === 4) score -= 1.2;
+  else if (nova === 3) score -= 0.5;
+  else if (nova === 1) score += 0.8;
+
+  // Sugar penalty
+  if (sugar > 22.5) score -= 1.5;
+  else if (sugar > 10) score -= 0.7;
+  else if (sugar < 5 && sugar > 0) score += 0.5;
+
+  // Salt penalty
+  if (salt > 1.5) score -= 1.0;
+  else if (salt > 0.5) score -= 0.4;
+
+  // Sat fat penalty
+  if (satFat > 10) score -= 0.8;
+  else if (satFat > 5) score -= 0.3;
+
+  // Protein bonus
+  if (protein > 10) score += 0.8;
+  else if (protein > 5) score += 0.4;
+
+  // Fiber bonus
+  if (fiber > 5) score += 0.6;
+  else if (fiber > 2) score += 0.3;
+
+  // Additives penalty
+  if (additives > 5) score -= 0.8;
+  else if (additives > 2) score -= 0.3;
+
+  score = Math.max(1, Math.min(10, Math.round(score * 10) / 10));
+
+  let color, summary;
+  if (score >= 8) { color = '#12b76a'; summary = 'Bu mahsulot ajoyib tanlov! Tarkibi toza va ozuqaviy jihatdan foydali.'; }
+  else if (score >= 6) { color = '#12b76a'; summary = 'Yaxshi mahsulot. Ba’zi jihatlarga e’tibor bering, lekin umumiy baho ijobiy.'; }
+  else if (score >= 4) { color = '#ff8a3d'; summary = 'O‘rtacha mahsulot. Tarkibida e’tibor talab qiladigan komponentlar bor.'; }
+  else { color = '#e53e3e'; summary = 'Ehtiyot bo‘ling! Bu mahsulot tarkibida ko‘plab qo‘shimchalar yoki yuqori shakar/tuz mavjud.'; }
+
+  return { value: score, color, summary };
+}
+
+function nutriCard(icon, val, unit, label, warn = false, ok = false) {
+  const cls = warn ? 'warn' : (ok ? 'ok' : '');
+  return `<div class="nutri-card ${cls}">
+    <div class="val">${val !== undefined && val !== null ? formatNum(val) : '—'}</div>
+    <div class="unit">${unit}</div>
+    <div class="label">${icon} ${label}</div>
+  </div>`;
+}
+
+/* ── Ingredient parsing ── */
+function parseIngredients(text) {
+  if (!text) return [];
+  return text
+    .replace(/_/g, ' ')
+    .split(/[,;]\s*/)
+    .map(s => s.trim())
+    .filter(s => s.length > 1 && s.length < 120)
+    .slice(0, 40);
+}
+
+function classifyIngredient(name) {
+  const lower = name.toLowerCase();
+  if (/e\d{3}/i.test(lower)) return { dot: 'p', cls: 'tag-info', label: 'E-kod' };
+  if (/sugar|shakar|glukoza|fruktoza|sirop/i.test(lower)) return { dot: 'o', cls: 'tag-mid', label: 'Shakar' };
+  if (/salt|tuz|natriy/i.test(lower)) return { dot: 'o', cls: 'tag-mid', label: 'Tuz' };
+  if (/palm|palmoy|gidrogen/i.test(lower)) return { dot: 'r', cls: 'tag-bad', label: 'Ehtiyot' };
+  if (/vitamin|mineral|kaltsiy|temir|probiotik/i.test(lower)) return { dot: 'g', cls: 'tag-safe', label: 'Foydali' };
+  return { dot: 'g', cls: 'tag-safe', label: 'Xavfsiz' };
+}
+
+/* ── Additive database (common E-numbers) ── */
+const ADDITIVE_DB = {
+  'E100': { desc: 'Kurkumin — tabiiy sariq bo‘yoq', level: 'safe' },
+  'E101': { desc: 'Riboflavin (B2 vitamini) — sariq bo‘yoq', level: 'safe' },
+  'E102': { desc: 'Tartrazin — sintetik sariq bo‘yoq', level: 'warn' },
+  'E104': { desc: 'Kinolin sariq — sintetik bo‘yoq', level: 'warn' },
+  'E110': { desc: 'Sunset Yellow — sintetik sariq bo‘yoq', level: 'warn' },
+  'E120': { desc: 'Karmin — tabiiy qizil bo‘yoq (hasharotdan)', level: 'safe' },
+  'E122': { desc: 'Azorubin — sintetik qizil bo‘yoq', level: 'warn' },
+  'E124': { desc: 'Ponceau 4R — sintetik qizil bo‘yoq', level: 'warn' },
+  'E129': { desc: 'Allura Red — sintetik qizil bo‘yoq', level: 'warn' },
+  'E131': { desc: 'Patent Blue V — sintetik ko‘k bo‘yoq', level: 'warn' },
+  'E132': { desc: 'Indigotin — sintetik ko‘k bo‘yoq', level: 'warn' },
+  'E140': { desc: 'Xlorofil — tabiiy yashil bo‘yoq', level: 'safe' },
+  'E150': { desc: 'Karamel — jigarrang bo‘yoq', level: 'safe' },
+  'E160a': { desc: 'Beta-karotin — tabiiy sariq bo‘yoq (A vitamini)', level: 'safe' },
+  'E160c': { desc: 'Paprika ekstrakti — tabiiy qizil bo‘yoq', level: 'safe' },
+  'E170': { desc: 'Kaltsiy karbonat — oq bo‘yoq', level: 'safe' },
+  'E171': { desc: 'Titan dioksidi — oq bo‘yoq (ba’zi mamlakatlarda taqiqlangan)', level: 'warn' },
+  'E200': { desc: 'Sorbin kislotasi — konservant', level: 'safe' },
+  'E202': { desc: 'Kaliy sorbat — konservant', level: 'safe' },
+  'E210': { desc: 'Benzoy kislotasi — konservant', level: 'warn' },
+  'E211': { desc: 'Natriy benzoat — konservant', level: 'warn' },
+  'E220': { desc: 'Sulfitlar — konservant', level: 'warn' },
+  'E250': { desc: 'Natriy nitrit — go‘sht konservanti', level: 'warn' },
+  'E260': { desc: 'Sirka kislotasi — konservant', level: 'safe' },
+  'E270': { desc: 'Sut kislotasi — konservant', level: 'safe' },
+  'E300': { desc: 'Askorbin kislotasi (C vitamini) — antioksidant', level: 'safe' },
+  'E301': { desc: 'Natriy askorbat — antioksidant', level: 'safe' },
+  'E306': { desc: 'Tokoferol (E vitamini) — antioksidant', level: 'safe' },
+  'E322': { desc: 'Lesitin — emulgator (ko‘pincha soya)', level: 'safe' },
+  'E330': { desc: 'Limon kislotasi — nordonlik sozlagich', level: 'safe' },
+  'E331': { desc: 'Natriy sitrat — nordonlik sozlagich', level: 'safe' },
+  'E338': { desc: 'Fosfor kislotasi — nordonlik sozlagich', level: 'warn' },
+  'E407': { desc: 'Karrageenan — quyuqlashtiruvchi', level: 'warn' },
+  'E412': { desc: 'Guar gum — tabiiy quyuqlashtiruvchi', level: 'safe' },
+  'E415': { desc: 'Ksantan gum — quyuqlashtiruvchi', level: 'safe' },
+  'E420': { desc: 'Sorbitol — shirinlashtiruvchi', level: 'safe' },
+  'E422': { desc: 'Gliserol — nam saqlovchi', level: 'safe' },
+  'E440': { desc: 'Pektin — tabiiy quyuqlashtiruvchi (mevadan)', level: 'safe' },
+  'E471': { desc: 'Mono- va diglitseridlar — emulgator', level: 'warn' },
+  'E500': { desc: 'Natriy karbonat — nordonlik sozlagich', level: 'safe' },
+  'E621': { desc: 'Natriy glutamat — ta’m kuchaytiruvchi', level: 'warn' },
+  'E627': { desc: 'Natriy guanilat — ta’m kuchaytiruvchi', level: 'warn' },
+  'E631': { desc: 'Natriy inozinat — ta’m kuchaytiruvchi', level: 'warn' },
+  'E951': { desc: 'Aspartam — suniy shirinlashtiruvchi', level: 'warn' },
+  'E952': { desc: 'Tsiklamat — suniy shirinlashtiruvchi', level: 'warn' },
+  'E954': { desc: 'Saxarin — suniy shirinlashtiruvchi', level: 'warn' },
+  'E960': { desc: 'Steviol glikozidlar — tabiiy shirinlashtiruvchi', level: 'safe' },
+  'E968': { desc: 'Eritritol — shirinlashtiruvchi', level: 'safe' },
+};
+
+function getAdditiveInfo(code) {
+  const base = code.replace(/[a-z]$/i, '');
+  const info = ADDITIVE_DB[base];
+  if (!info) return { dot: 'o', cls: 'tag-mid', label: 'Noma’lum', desc: 'Bu E-kod haqida ma’lumot bazada yo‘q.' };
+  if (info.level === 'safe') return { dot: 'g', cls: 'tag-safe', label: 'Xavfsiz', desc: info.desc };
+  return { dot: 'o', cls: 'tag-mid', label: 'Ehtiyot', desc: info.desc };
+}
+
+/* ── Concerns ── */
+function getConcerns(product) {
+  const concerns = [];
+  const n = product.nutriments || {};
+  const sugar = n.sugars_100g;
+  const salt = n.salt_100g;
+  const satFat = n['saturated-fat_100g'];
+  const nova = product.nova_group;
+  const additives = product.additives_n || 0;
+
+  if (sugar !== undefined && sugar > 22.5) {
+    concerns.push({ icon: '🍬', type: '', title: `Yuqori shakar: ${formatNum(sugar)} g / 100 g`, text: 'Kunlik me’yor 25–30 g. Bu mahsulotdan kuniga 1–2 donadan ortiq iste’mol qilmang.' });
+  }
+  if (salt !== undefined && salt > 1.5) {
+    concerns.push({ icon: '🧂', type: '', title: `Yuqori tuz: ${formatNum(salt)} g / 100 g`, text: 'Qon bosimi va yurak salomatligi uchun ehtiyot bo‘ling.' });
+  }
+  if (satFat !== undefined && satFat > 10) {
+    concerns.push({ icon: '🧈', type: '', title: `Yuqori to‘yingan yog‘: ${formatNum(satFat)} g / 100 g`, text: 'Xolesterin darajasiga ta’sir qilishi mumkin.' });
+  }
+  if (nova === 4) {
+    concerns.push({ icon: '🏭', type: '', title: 'Ultra-qayta ishlangan (NOVA 4)', text: 'Bu mahsulot sanoat usulida qayta ishlangan va tarkibida ko‘plab qo‘shimchalar bo‘lishi mumkin.' });
+  }
+  if (additives > 5) {
+    concerns.push({ icon: '🧪', type: '', title: `${additives} ta E-qo‘shimcha`, text: 'Ko‘p miqdordagi qo‘shimchalar sog‘liqqa salbiy ta’sir qilishi mumkin. Tarkibni diqqat bilan o‘qing.' });
+  }
+  return concerns;
+}
+
+/* ── Similar products ── */
+async function loadSimilarProducts(categories, currentBarcode) {
+  const block = document.getElementById('similarBlock');
+  if (!block) return;
+
+  const similar = await searchSimilarProducts(categories, currentBarcode);
+  if (similar.length === 0) return;
+
+  let html = `<div style="margin-top:28px;padding-top:24px;border-top:1px solid var(--line)">
+    <h4 style="font-size:.95rem;margin-bottom:16px;display:flex;align-items:center;gap:8px">🔄 O‘xshash mahsulotlar</h4>
+    <div class="similar-grid">`;
+
+  similar.forEach(p => {
+    const name = p.product_name || p.brands || 'Noma’lum';
+    const grade = (p.nutriscore_grade || '').toUpperCase();
+    const scoreClass = grade === 'A' || grade === 'B' ? 'hi' : 'mid';
+    const scoreText = grade ? `Nutri-Score ${grade}` : '—';
+
+    html += `<div class="sim-card" onclick="lookupProduct('${escapeHtml(p.code)}')">
+      <div class="sim-emoji">${p.image_front_small_url ? `<img src="${escapeHtml(p.image_front_small_url)}" style="width:48px;height:48px;object-fit:cover;border-radius:12px;margin:0 auto 8px" onerror="this.outerHTML='📦'">` : '📦'}</div>
+      <b>${escapeHtml(name.substring(0, 28))}</b>
+      <small>${escapeHtml(p.brands || '')}</small>
+      <span class="sim-score ${scoreClass}">${scoreText}</span>
+    </div>`;
+  });
+
+  html += `</div></div>`;
+  block.innerHTML = html;
+}
+
+/* ── Tabs ── */
+function initTabs() {
+  const tabs = els.resultCard.querySelectorAll('.tab');
+  const panels = els.resultCard.querySelectorAll('.tab-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const key = tab.dataset.tab;
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      const panel = els.resultCard.querySelector(`.tab-panel[data-panel="${key}"]`);
+      if (panel) panel.classList.add('active');
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   IMAGE UPLOAD / OCR FALLBACK
+   ═══════════════════════════════════════════════ */
+
+function openUploadModal() {
+  els.uploadModal.classList.add('show');
+  els.uploadPreview.style.display = 'none';
+  els.uploadArea.style.display = 'block';
+  state.uploadedFile = null;
+}
+
+function closeUploadModal() {
+  els.uploadModal.classList.remove('show');
+}
+
+async function handleFileSelect(file) {
+  if (!file) return;
+  if (file.size > CONFIG.MAX_UPLOAD_SIZE) {
+    showToast('Fayl hajmi 10 MB dan oshmasligi kerak.', 'error');
+    return;
+  }
+  if (!file.type.startsWith('image/')) {
+    showToast('Faqat rasm fayllarini yuklang.', 'error');
+    return;
+  }
+
+  state.uploadedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    els.previewImg.src = e.target.result;
+    els.uploadPreview.style.display = 'block';
+    els.uploadArea.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeUploadedImage() {
+  if (!state.uploadedFile) return;
+
+  closeUploadModal();
+  showState('Loading');
+  els.loadingText.textContent = 'Rasm tahlil qilinmoqda…';
+  els.loadingSub.textContent = 'OCR va AI texnologiyasi ishlamoqda';
+
+  try {
+    // Send image to backend for OCR + AI analysis
+    const formData = new FormData();
+    formData.append('image', state.uploadedFile);
+    formData.append('barcode', state.scannedBarcode || '');
+
+    const res = await fetch('/api/ocr-analyze', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error(`OCR HTTP ${res.status}`);
+    const data = await res.json();
+
+    // If backend returns structured product data, render it
+    if (data.product) {
+      renderResult(data.product, data.analysis, state.scannedBarcode || 'OCR');
+    } else if (data.analysis) {
+      // Just analysis text
+      const fakeProduct = {
+        code: state.scannedBarcode || 'OCR',
+        product_name: data.productName || 'OCR tahlili',
+        brands: '',
+        nutriments: {},
+        ingredients_text: data.ingredients || '',
+      };
+      renderResult(fakeProduct, data.analysis, state.scannedBarcode || 'OCR');
+    } else {
+      throw new Error('Empty response');
+    }
+  } catch (err) {
+    console.warn('OCR backend unavailable:', err.message);
+    // Fallback: show manual entry with prefilled barcode
+    showToast('OCR xizmati hozircha mavjud emas. Ma’lumotni qo‘lda kiriting.', 'error');
+    openManualModal();
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   MANUAL ENTRY FALLBACK
+   ═══════════════════════════════════════════════ */
+
+function openManualModal() {
+  els.manualModal.classList.add('show');
+  document.getElementById('manualName').value = '';
+  document.getElementById('manualBrand').value = '';
+  document.getElementById('manualIngredients').value = '';
+  document.getElementById('manualAllergens').value = '';
+}
+
+function closeManualModal() {
+  els.manualModal.classList.remove('show');
+}
+
+async function handleManualSubmit(e) {
+  e.preventDefault();
+
+  const name = document.getElementById('manualName').value.trim();
+  const brand = document.getElementById('manualBrand').value.trim();
+  const ingredients = document.getElementById('manualIngredients').value.trim();
+  const allergens = document.getElementById('manualAllergens').value.trim();
+
+  if (!name || !ingredients) {
+    showToast('Iltimos, majburiy maydonlarni to‘ldiring.', 'error');
+    return;
+  }
+
+  closeManualModal();
+  showState('Loading');
+  els.loadingText.textContent = 'AI tahlil qilmoqda…';
+  els.loadingSub.textContent = 'Kiritilgan ma’lumotlar o‘rganilmoqda';
+
+  // Build a synthetic product object
+  const fakeProduct = {
+    code: state.scannedBarcode || 'MANUAL',
+    product_name: name,
+    brands: brand,
+    ingredients_text: ingredients,
+    allergens_tags: allergens ? allergens.split(',').map(a => 'en:' + a.trim().toLowerCase()) : [],
+    nutriments: {},
+    additives_tags: extractAdditives(ingredients),
+    additives_n: extractAdditives(ingredients).length,
+  };
+
+  try {
+    const analysis = await analyzeWithAI(fakeProduct);
+    renderResult(fakeProduct, analysis, fakeProduct.code);
+  } catch (err) {
+    showToast('Tahlil qilishda xatolik yuz berdi.', 'error');
+    showState('Idle');
+  }
+}
+
+function extractAdditives(text) {
+  const matches = text.match(/E\d{3,4}[a-z]?/gi) || [];
+  return [...new Set(matches.map(m => 'en:' + m.toLowerCase()))];
+}
+
+/* ═══════════════════════════════════════════════
+   NAV, REVEAL, COUNTERS
+   ═══════════════════════════════════════════════ */
+
+// Nav scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 12);
+});
+
+// Burger
+document.getElementById('burger').addEventListener('click', () => {
+  document.getElementById('burger').classList.toggle('open');
+  document.getElementById('navLinks').classList.toggle('open');
+});
+
+document.querySelectorAll('#navLinks a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('burger').classList.remove('open');
+    document.getElementById('navLinks').classList.remove('open');
+  });
+});
+
+// Reveal on scroll
+const revealIO = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const delay = entry.target.dataset.delay || 0;
+      setTimeout(() => entry.target.classList.add('in'), delay);
+      revealIO.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+document.querySelectorAll('[data-reveal]').forEach(el => revealIO.observe(el));
+
+// Counters
+const counterIO = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    const target = parseFloat(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const start = performance.now();
+    function tick(now) {
+      const p = Math.min((now - start) / 1400, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    counterIO.unobserve(el);
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('[data-count]').forEach(c => counterIO.observe(c));
+
+/* ═══════════════════════════════════════════════
+   EVENT LISTENERS
+   ═══════════════════════════════════════════════ */
+
+// Scanner buttons
+document.getElementById('btnOpenCamera').addEventListener('click', openCamera);
+document.getElementById('btnStopCamera').addEventListener('click', async () => {
+  await stopCamera();
+  showState('Idle');
+});
+document.getElementById('btnSwitchCamera').addEventListener('click', switchCamera);
+
+// Manual barcode
+document.getElementById('btnManualSearch').addEventListener('click', () => {
+  const code = els.manualBarcode.value.trim();
+  if (code) lookupProduct(code);
+});
+els.manualBarcode.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const code = els.manualBarcode.value.trim();
+    if (code) lookupProduct(code);
+  }
+});
+
+// Not found actions
+document.getElementById('btnUploadPhoto').addEventListener('click', openUploadModal);
+document.getElementById('btnManualEntry').addEventListener('click', openManualModal);
+document.getElementById('btnScanAgain').addEventListener('click', () => {
+  state.scannedBarcode = null;
+  showState('Idle');
+});
+
+// Upload modal
+document.getElementById('btnCloseUpload').addEventListener('click', closeUploadModal);
+els.uploadArea.addEventListener('click', () => els.fileInput.click());
+els.fileInput.addEventListener('change', (e) => handleFileSelect(e.target.files[0]));
+document.getElementById('btnRemoveImage').addEventListener('click', () => {
+  state.uploadedFile = null;
+  els.uploadPreview.style.display = 'none';
+  els.uploadArea.style.display = 'block';
+});
+document.getElementById('btnAnalyzeImage').addEventListener('click', analyzeUploadedImage);
+
+// Drag & drop
+['dragover', 'dragenter'].forEach(evt => {
+  els.uploadArea.addEventListener(evt, (e) => { e.preventDefault(); els.uploadArea.classList.add('dragover'); });
+});
+['dragleave', 'drop'].forEach(evt => {
+  els.uploadArea.addEventListener(evt, (e) => { e.preventDefault(); els.uploadArea.classList.remove('dragover'); });
+});
+els.uploadArea.addEventListener('drop', (e) => {
+  if (e.dataTransfer.files.length) handleFileSelect(e.dataTransfer.files[0]);
+});
+
+// Manual modal
+document.getElementById('btnCloseManual').addEventListener('click', closeManualModal);
+document.getElementById('manualForm').addEventListener('submit', handleManualSubmit);
+
+// Close modals on overlay click
+[els.uploadModal, els.manualModal].forEach(m => {
+  m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('show'); });
+});
+
+// Close modals on Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    els.uploadModal.classList.remove('show');
+    els.manualModal.classList.remove('show');
+  }
+});
+
+// Smooth anchor scroll (fallback)
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function (e) {
+    const id = this.getAttribute('href');
+    if (id === '#') return;
+    const target = document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    const top = target.getBoundingClientRect().top + window.pageYOffset - 84;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+
+/* ═══════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════ */
+(function init() {
+  showState('Idle');
+  console.log('%cScan&Know v1.0', 'color:#12b76a;font-weight:bold;font-size:14px');
+  console.log('Created by Abubakr Akhmadjanov');
+})();
+
+/* ═══════════════════════════════════════════════
+   BACKEND SERVER (Node.js/Express) — SEE BELOW
+   ═══════════════════════════════════════════════
+   
+   The frontend expects two backend endpoints:
+   
+   1. POST /api/analyze
+      Body: { barcode, name, brands, ingredients, allergens, additives, nutriments, nutriscore, nova_group }
+      Returns: { analysis: "..." }
+   
+   2. POST /api/ocr-analyze
+      Body: FormData { image: File, barcode: string }
+      Returns: { analysis: "...", productName: "...", ingredients: "..." }
+   
+   A minimal Express server implementation is provided in server.js.
+   ═══════════════════════════════════════════════ */
+</script>
+
+</body>
+</html>
