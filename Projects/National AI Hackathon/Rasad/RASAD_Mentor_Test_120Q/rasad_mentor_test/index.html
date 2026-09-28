@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b1f3a" />
+  <title>RASAD — Mentor Test Simulator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ambient a1"></div><div class="ambient a2"></div>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">R</div>
+        <div>
+          <div class="brand-title">RASAD</div>
+          <div class="brand-sub">Mentor savollari test simulyatori</div>
+        </div>
+      </div>
+      <div class="top-meta">
+        <span class="pill">25 savol</span>
+        <span class="pill">120+ savol bazasi</span>
+        <button id="themeBtn" class="icon-btn" title="Ko‘rinishni almashtirish">◐</button>
+      </div>
+    </header>
+
+    <section id="startScreen" class="screen active">
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">RASAD • CHECKPOINT PREP</span>
+          <h1>Texnik, biznes va soha mentorlariga tayyorlanish uchun <span>maksimal test</span></h1>
+          <p>Har bir urinishda savollar bazasidan 25 ta noyob savol balanslangan tarzda tanlanadi. Variantlar aralashtiriladi, javoblar mahalliy xotirada saqlanadi va yakunda to‘liq tahlil beriladi.</p>
+          <div class="feature-row">
+            <div class="feature"><b>6 yo‘nalish</b><span>Texnik • AI • Soha • Biznes • Huquq • Pitch</span></div>
+            <div class="feature"><b>30 daqiqa</b><span>Real checkpoint ritmiga yaqin vaqt</span></div>
+            <div class="feature"><b>Izohli tahlil</b><span>Har bir javob bo‘yicha himoya izohi</span></div>
+          </div>
+        </div>
+        <div class="start-card glass">
+          <h2>Testni boshlash</h2>
+          <label>Ism / jamoa a’zosi
+            <input id="candidateName" type="text" placeholder="Masalan: Usmonali" maxlength="60" />
+          </label>
+          <div class="mode-note">
+            <div class="mode-icon">✓</div>
+            <div><b>Kompleks mentor rejimi</b><span>25 savol barcha asosiy yo‘nalishlardan balanslangan holda olinadi.</span></div>
+          </div>
+          <label class="checkline"><input id="shuffleOptions" type="checkbox" checked /> Javob variantlarini aralashtirish</label>
+          <label class="checkline"><input id="showDifficulty" type="checkbox" /> Savol murakkabligini ko‘rsatish</label>
+          <button id="startBtn" class="primary-btn">Testni boshlash <span>→</span></button>
+          <button id="resumeBtn" class="secondary-btn hidden">Davom ettirish</button>
+        </div>
+      </div>
+
+      <div class="domains-grid">
+        <article><div class="dicon">⚙</div><h3>Texnik arxitektura</h3><p>Frontend, backend, API, DB, asinxron vazifalar, monitoring.</p></article>
+        <article><div class="dicon">AI</div><h3>SI va ma’lumotlar</h3><p>Risk Engine, anomaliya, tushuntiriladigan SI, drift va sifat.</p></article>
+        <article><div class="dicon">₿</div><h3>Iqtisodiy soha</h3><p>Xavf signallari, indikatorlar, hududiy va tarmoq tahlili.</p></article>
+        <article><div class="dicon">↗</div><h3>Biznes</h3><p>Mijoz, qiymat taklifi, monetizatsiya, pilot va masshtablash.</p></article>
+        <article><div class="dicon">⌾</div><h3>Huquq va xavfsizlik</h3><p>RBAC/ABAC, audit, maxfiylik, inson nazorati, data governance.</p></article>
+        <article><div class="dicon">▶</div><h3>Pitch va demo</h3><p>Golden Path, 3+2+2 format, himoya savollari va demo logikasi.</p></article>
+      </div>
+    </section>
+
+    <section id="quizScreen" class="screen">
+      <div class="quiz-layout">
+        <aside class="quiz-side glass">
+          <div class="side-head">
+            <div>
+              <span class="label">Qolgan vaqt</span>
+              <div id="timer" class="timer">30:00</div>
+            </div>
+            <div class="circular-progress"><span id="progressPct">0%</span></div>
+          </div>
+          <div class="stat-mini"><span>Javob berildi</span><b id="answeredCount">0 / 25</b></div>
+          <div class="stat-mini"><span>Belgilangan</span><b id="flaggedCount">0</b></div>
+          <div class="palette-title">Savollar</div>
+          <div id="questionPalette" class="question-palette"></div>
+          <div class="legend">
+            <span><i class="lg current"></i>Joriy</span>
+            <span><i class="lg done"></i>Javobli</span>
+            <span><i class="lg flag"></i>Belgilangan</span>
+          </div>
+          <button id="finishBtnSide" class="danger-ghost">Testni yakunlash</button>
+        </aside>
+
+        <section class="question-card glass">
+          <div class="q-top">
+            <div>
+              <span id="categoryBadge" class="category-badge"></span>
+              <span id="difficultyBadge" class="difficulty-badge hidden"></span>
+            </div>
+            <button id="flagBtn" class="flag-btn">☆ Belgilash</button>
+          </div>
+          <div class="q-number">Savol <b id="qNumber">1</b> / 25</div>
+          <h2 id="questionText"></h2>
+          <div id="optionsList" class="options-list"></div>
+          <div class="q-actions">
+            <button id="prevBtn" class="secondary-btn">← Oldingi</button>
+            <div class="keyboard-tip">1–4: javob • ← →: navigatsiya • F: belgilash</div>
+            <button id="nextBtn" class="primary-btn">Keyingi →</button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <div class="result-hero glass">
+        <div class="score-ring"><span id="scorePct">0%</span><small>natija</small></div>
+        <div>
+          <span class="eyebrow">TEST YAKUNLANDI</span>
+          <h1 id="resultTitle">Natija</h1>
+          <p id="resultSummary"></p>
+          <div class="result-actions">
+            <button id="newTestBtn" class="primary-btn">Yangi 25 savol</button>
+            <button id="exportBtn" class="secondary-btn">Natijani CSV</button>
+            <button id="printBtn" class="secondary-btn">Chop etish</button>
+          </div>
+        </div>
+      </div>
+      <div id="categoryResults" class="category-results"></div>
+      <div class="review-head"><h2>Savollar tahlili</h2><div class="review-filter"><button data-filter="all" class="active">Barchasi</button><button data-filter="wrong">Xatolar</button><button data-filter="correct">To‘g‘ri</button><button data-filter="flagged">Belgilangan</button></div></div>
+      <div id="reviewList" class="review-list"></div>
+    </section>
+  </main>
+
+  <div id="confirmModal" class="modal hidden">
+    <div class="modal-card glass">
+      <h3>Testni yakunlaysizmi?</h3>
+      <p id="finishModalText"></p>
+      <div class="modal-actions"><button id="cancelFinish" class="secondary-btn">Davom etish</button><button id="confirmFinish" class="danger-btn">Yakunlash</button></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
